@@ -33,7 +33,7 @@ Delivered: architecture, RAG pipeline design, folder structure, risk list, workf
 
 Rule for this phase: one installation or configuration step at a time, each command explained, wait for the owner's confirmation. No software is assumed installed until the owner confirms.
 
-**Progress (2026-11-21):** P1.1, P1.2 and P1.3 done. P1.4 to P1.7 not started.
+**Progress (2026-11-21):** P1.1 to P1.4 done. P1.5 to P1.7 not started.
 
 | ID | Milestone | Outcome |
 |---|---|---|
