@@ -9,6 +9,7 @@ Status legend: **Accepted** = approved by the owner. **Provisional** = sensible 
 - 2026-11-20: Phase 0 approved. Seven refinements added: TD-004 (embedding swap and re-index), TD-006 (security), TD-007 (durable processing), TD-008 (evaluation), TD-009 (single-user, multi-user ready), TD-010 (Git and GitHub), TD-011 (free-plan workflow).
 - 2026-11-20: TD-007 **replaces** the earlier plan to use FastAPI BackgroundTasks. BackgroundTasks do not survive a restart, so we use a database-backed job queue with one in-process worker.
 - 2026-11-21: Collaboration and deployment plans recorded as TD-013 (two-person Git workflow) and TD-014 (deployment constraints and guardrails). The approved architecture is unchanged. TD-010 gains one rule: once a collaborator joins, nothing goes straight to `main`.
+- 2026-11-21: P1.4 findings recorded as TD-015 (Windows development conventions: run Python tools as `python -m`, `httpx2` as the test client). TD-013 gains the merge-method rule.
 
 ---
 
@@ -184,6 +185,7 @@ Context: the owner owns the GitHub repository `documind`. A friend joins as a co
 - **Shared files** (`PROJECT_STATE.md`, `TASKS.md`, `TECHNICAL_DECISIONS.md`): updated only inside the pull request that completes a milestone, after pulling the latest `main`. Changes to `TECHNICAL_DECISIONS.md` need both people to agree in the pull request.
 - **Claude sessions:** each person uses their own Claude account and usage limits. `PROJECT_STATE.md` in the repository is the shared handoff, pasted into a fresh chat.
 - **Commits:** Conventional Commits, meaningful messages, authored under each person's own GitHub account so the contribution history is accurate for both.
+- **Merging:** pull requests are merged with GitHub's "Create a merge commit" option, so every meaningful commit stays in the history. The branch is deleted after merging, and everyone updates local `main` before starting the next milestone.
 
 ## TD-014 Deployment plan, constraints and guardrails (Plan Accepted, hosts Deferred, nothing deployed before Phase 11)
 
@@ -203,3 +205,12 @@ Plan: GitHub holds the source. Vercel hosts the React + Vite frontend (the `fron
 5. The frontend never hardcodes `localhost`: the API address comes from `VITE_API_BASE_URL` starting in P1.7.
 6. Frontend and backend run on different domains, so the token-versus-cookie decision (SameSite, CORS credentials) is made in Phase 9 with that in mind.
 7. Deployment files and a `DEPLOYMENT.md` are written in Phase 11, with separate development and production configuration.
+
+## TD-015 Windows development conventions (Accepted)
+
+Found while building P1.4 on Windows 11 Home with Smart App Control active (2026-11-21).
+
+- **Run Python tools as modules:** `python -m pip`, `python -m pytest`, `python -m uvicorn`. Windows 11's Smart App Control blocked `pip.exe`, one of the small unsigned launcher programs that virtual environments generate, with the message "An Application Control policy has blocked this file". `pytest.exe` and `uvicorn.exe` are the same kind of launcher, so we avoid all of them. `python.exe` is signed and allowed, so the module form works. The compiled packages (pydantic-core, watchfiles, httptools) loaded without problems on the owner's machine. Do not turn off Windows security to work around this.
+- **Test client:** `httpx2` (2.16.2) is pinned in `requirements-dev.txt`, not `httpx`. Starlette's `TestClient` now tries `httpx2` first and warns that using `httpx` is deprecated. `httpx2` is a fork of httpx 0.28.1 with the same public API and needs Python 3.11 or newer.
+- **Virtual environment:** `backend/.venv`, created with `py -3.12` (Python 3.12.10) because the machine's default `python` is 3.15. Activation with `.\.venv\Scripts\Activate.ps1` worked without changing PowerShell's script policy.
+- **Pinning:** `requirements.txt` pins only the packages we use directly. Their dependencies float within compatible ranges.

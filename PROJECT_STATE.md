@@ -8,8 +8,8 @@ Last updated: 2026-11-21
 Phase 1: Project initialization and environment setup. Phase 0 is complete and approved.
 
 ## Current task
-**P1.4 Backend scaffold, not started.** First step: create the `backend/` folder and the Python 3.12 virtual environment (`py -3.12`).
-P1.3 is completed by the commit that adds this file, `TASKS.md` and the two decision documents. This file describes the state as of that commit.
+**P1.5 Dependency spike (PyMuPDF, ChromaDB), not started.** First step: create the milestone branch, then install PyMuPDF into the backend virtual environment with `python -m pip install` and check that it imports. Then the same for ChromaDB.
+P1.4 is complete when its pull request (branch `sujal/p1-4-backend-scaffold`) is merged into `main`. This file describes the state as of that merge.
 
 ## Milestone progress (Phase 1)
 | ID | Milestone | Status |
@@ -17,7 +17,7 @@ P1.3 is completed by the commit that adds this file, `TASKS.md` and the two deci
 | P1.1 | Environment audit | Done |
 | P1.2 | Git and GitHub identity | Done |
 | P1.3 | Repository skeleton and first commit | Done |
-| P1.4 | Backend scaffold | Not started |
+| P1.4 | Backend scaffold | Done |
 | P1.5 | Dependency spike (PyMuPDF, ChromaDB) | Not started |
 | P1.6 | Frontend scaffold | Not started |
 | P1.7 | Connect, setup guide, invite collaborator, close phase | Not started |
@@ -26,16 +26,18 @@ P1.3 is completed by the commit that adds this file, `TASKS.md` and the two deci
 - Phase 0: architecture, RAG pipeline design, folder structure, risk list, workflow and roadmap approved. Seven refinements added (`TECHNICAL_DECISIONS.md`, TD-004 to TD-011).
 - P1.1: every tool below was checked and confirmed by the owner, one step at a time.
 - P1.2: Git identity set, GitHub email privacy switched on, private repository created.
-- P1.3: project folder, Git repository, remote `origin`, `.gitignore` and `README.md` (first commit `f85128b`, pushed to GitHub, confirmed by the owner's push output), then the project documents and `TASKS.md` in the commit that finishes the milestone. The `frontend/` and `backend/` folders appear with their first files, because Git does not track empty folders.
-- Features: none built yet.
+- P1.3: project folder, Git repository, remote `origin`, `.gitignore`, `README.md` (commit `f85128b`) and the project documents with `TASKS.md` (commit `9fc6099`), both pushed to GitHub.
+- P1.4: `backend/` folder, Python 3.12 virtual environment, FastAPI app with `GET /health`, first pytest passing, server run and `/health` and `/docs` checked in the browser by the owner. Feature commit `c41ed55` on branch `sujal/p1-4-backend-scaffold`.
+- Product features: none yet. The backend exposes only `GET /health`.
 
 ## Files created or modified
-In the Git repository (`C:\dev\documind`):
-- `.gitignore`: committed in `f85128b` and pushed.
-- `README.md`: stub, committed in `f85128b` and pushed.
+On `main` (pushed): `.gitignore`, `README.md`, `TECHNICAL_DECISIONS.md`, `DEVELOPMENT_ROADMAP.md`, `PROJECT_STATE.md`, `TASKS.md`.
 
-Added by the commit that finishes P1.3:
-- `TECHNICAL_DECISIONS.md`, `DEVELOPMENT_ROADMAP.md`, `PROJECT_STATE.md`, `TASKS.md`.
+Added by P1.4 (branch `sujal/p1-4-backend-scaffold`):
+- `backend/app/__init__.py` (empty), `backend/app/main.py` (FastAPI app and `/health`), `backend/tests/test_health.py`, `backend/requirements.txt`, `backend/requirements-dev.txt` (commit `c41ed55`).
+- Updated in the P1.4 documentation commit: `PROJECT_STATE.md`, `TASKS.md`, `DEVELOPMENT_ROADMAP.md`, `TECHNICAL_DECISIONS.md`.
+
+Local only, never committed: `backend/.venv/` (gitignored).
 
 ## Architecture (summary, unchanged)
 - React + TypeScript + Vite frontend; FastAPI backend (routes, services, repositories and providers).
@@ -54,7 +56,7 @@ Details: `TECHNICAL_DECISIONS.md`.
 - The frontend reads the API address from `VITE_API_BASE_URL` (set up in P1.7), never a hardcoded address.
 
 ## Technologies and dependencies
-Confirmed installed on the owner's laptop (Windows 10 Home, 64-bit):
+Confirmed installed on the owner's laptop (Windows 11 Home Single Language, 64-bit):
 | Tool | Version | Notes |
 |---|---|---|
 | Git | 2.56.0 | `init.defaultBranch` set to `main`; commit email is the GitHub noreply address |
@@ -63,33 +65,51 @@ Confirmed installed on the owner's laptop (Windows 10 Home, 64-bit):
 | npm | 11.19.1 | |
 | VS Code | 1.147.0 (x64) | Extensions installed: Python, Pylance, ESLint, Tailwind CSS IntelliSense (plus Claude Code, Live Server) |
 
-Project dependencies (FastAPI, React, ChromaDB and so on) are not installed yet. Versions are pinned when they are.
+Backend packages in `backend/.venv`, pinned in `backend/requirements.txt` and `backend/requirements-dev.txt`:
+| Package | Version | Purpose |
+|---|---|---|
+| fastapi | 0.165.0 | Web framework |
+| uvicorn[standard] | 0.54.0 | Server |
+| pytest | 9.2.0 | Test runner |
+| httpx2 | 2.16.2 | Used by Starlette's `TestClient` (replaces httpx, see TD-015) |
+
+Installed automatically and not pinned directly: pydantic 2.14.4, starlette 1.10.0.
+Not installed yet: frontend packages, PyMuPDF and ChromaDB (spike in P1.5).
 
 ## Commands to run the application
-None yet.
+Run these in PowerShell from `C:\dev\documind\backend`.
+- Activate the virtual environment (once per terminal window; the prompt then shows `(.venv)`): `.\.venv\Scripts\Activate.ps1`
+- Run the API: `python -m uvicorn app.main:app --reload`, then open http://127.0.0.1:8000/health and http://127.0.0.1:8000/docs. Stop it with `Ctrl+C`.
+- Run the tests: `python -m pytest`
+- Rebuild the environment on another machine: `py -3.12 -m venv .venv`, activate it, then `python -m pip install -r requirements-dev.txt`
+- Always run Python tools as `python -m ...` (TD-015).
 
 ## Tests performed and results
-None yet (no application code exists). Environment checks are listed above.
+- 2026-11-21: `python -m pytest` gave `1 passed` with no warnings (`tests/test_health.py`).
+- 2026-11-21: `python -m pip install -r requirements-dev.txt` found everything already satisfied, so the requirements files match the environment.
+- 2026-11-21: the server started with `python -m uvicorn app.main:app --reload`. The owner confirmed `/health` returned `{"status":"ok","service":"documind-api"}` and `/docs` showed the interactive documentation.
 
 ## Known bugs and unresolved issues
-- No bugs (no application code exists).
-- Unverified: PowerShell script-execution policy (affects `npm` and virtual-environment activation). We will find out in P1.4 and P1.6 and fix it then if needed.
+- No known bugs.
+- Windows 11 Smart App Control blocked `pip.exe` ("An Application Control policy has blocked this file"). Workaround: run tools as `python -m ...` (TD-015). The compiled packages (pydantic-core, watchfiles, httptools) loaded fine. Do not disable Windows security.
+- The "new pip release available" notice is ignored for now (pip is 25.0.1).
 - Open risks: ChromaDB installation on Windows (spike in P1.5), free-tier API quotas, scanned PDFs without text.
 - Deployment constraints (TD-014): Vercel Hobby does not support collaboration on private repositories; free backend hosting is weak for a persistent-disk, always-on service. Both are Phase 11 decisions.
 - Deferred decisions: embedding provider (Phase 5), LLM provider (Phase 6), PDF viewer (Phase 6), backend host and Vercel plan (Phase 11), cross-origin auth method (Phase 9). See TD-012.
 
 ## Owner environment
-Windows 10 laptop, 8 GB RAM, Intel Core i3, integrated graphics, 512 GB storage. Free Claude plan with usage limits. Project folder: `C:\dev\documind`. Repository: https://github.com/tambesujal406-design/documind.git (private).
+Windows 11 laptop (an earlier version of this file said Windows 10, which was wrong), 8 GB RAM, Intel Core i3, integrated graphics, 512 GB storage. Free Claude plan with usage limits. Project folder: `C:\dev\documind`. Repository: https://github.com/tambesujal406-design/documind.git (private).
 
 ## Working agreements
 - One setup step at a time, each command explained, wait for the owner's confirmation.
 - Do not repeat completed checks. Do not overwrite or recreate existing files or working configuration.
+- Each code milestone is built on its own branch named `sujal/<milestone-id>-<topic>` and merged through a pull request (TD-010, TD-013).
 - Small milestones, each with a meaningful commit and updated docs (TD-010, TD-011).
 - `PROJECT_STATE.md` is updated after every completed milestone.
+- Run Python tools as `python -m ...` (TD-015).
 - "Verified" means the owner ran it and reported the result.
 - Complete code for every created or changed file, with exact file paths.
 
 ## Exact next steps
-1. P1.4: create the `backend/` folder, the Python 3.12 virtual environment and a FastAPI `/health` endpoint with a passing pytest.
-2. P1.5: PyMuPDF and ChromaDB install spike.
-3. P1.6 and P1.7: frontend scaffold, connection to the backend, `SETUP_GUIDE.md`, invite the collaborator, tag `phase-1-complete`.
+1. P1.5: create branch `sujal/p1-5-dependency-spike`, install PyMuPDF and ChromaDB with `python -m pip`, check that both import and work, and decide ChromaDB versus the SQLite plus NumPy fallback (TD-012).
+2. P1.6 and P1.7: frontend scaffold, connection to the backend, `SETUP_GUIDE.md`, invite the collaborator, tag `phase-1-complete`.

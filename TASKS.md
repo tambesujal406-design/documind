@@ -13,7 +13,7 @@ The full plan for every phase is in `DEVELOPMENT_ROADMAP.md`. The current state 
 | P1.1 | Environment audit | Sujal | Done |
 | P1.2 | Git and GitHub identity | Sujal | Done |
 | P1.3 | Repository skeleton and first commit | Sujal | Done |
-| P1.4 | Backend scaffold (virtual environment, `/health`, first pytest) | Sujal | Todo |
+| P1.4 | Backend scaffold (virtual environment, `/health`, first pytest) | Sujal | Done |
 | P1.5 | Dependency spike (PyMuPDF, ChromaDB) | Sujal | Todo |
 | P1.6 | Frontend scaffold (Vite, React, TypeScript, Tailwind, Lucide) | Sujal | Todo |
 | P1.7 | Connect frontend to backend, `SETUP_GUIDE.md`, invite collaborator, tag `phase-1-complete` | Sujal | Todo |
