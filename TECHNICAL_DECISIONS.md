@@ -1,0 +1,205 @@
+# DocuMind: Technical Decisions
+
+Last updated: 2026-11-21 (collaboration and deployment plans recorded)
+
+Status legend: **Accepted** = approved by the owner. **Provisional** = sensible default, to be tuned or verified. **Deferred** = decided later, after live checks.
+
+## Revision log
+
+- 2026-11-20: Phase 0 approved. Seven refinements added: TD-004 (embedding swap and re-index), TD-006 (security), TD-007 (durable processing), TD-008 (evaluation), TD-009 (single-user, multi-user ready), TD-010 (Git and GitHub), TD-011 (free-plan workflow).
+- 2026-11-20: TD-007 **replaces** the earlier plan to use FastAPI BackgroundTasks. BackgroundTasks do not survive a restart, so we use a database-backed job queue with one in-process worker.
+- 2026-11-21: Collaboration and deployment plans recorded as TD-013 (two-person Git workflow) and TD-014 (deployment constraints and guardrails). The approved architecture is unchanged. TD-010 gains one rule: once a collaborator joins, nothing goes straight to `main`.
+
+---
+
+## TD-001 Technology stack (Accepted)
+
+- **Frontend:** React, TypeScript, Vite, Tailwind CSS, Lucide Icons, React Router, TanStack Query, react-pdf (PDF preview and jump to page; confirm in Phase 6).
+- **Backend:** Python 3.12, FastAPI, Uvicorn, Pydantic, SQLAlchemy 2.x, pytest. Alembic migrations are added in Phase 9, when the schema has settled.
+- **Document processing:** PyMuPDF (text per page, page metadata, PDF outline).
+- **Storage:** SQLite in WAL mode now, PostgreSQL later through SQLAlchemy. ChromaDB (embedded) for vectors.
+- **AI:** hosted LLM and hosted embeddings behind provider interfaces (TD-004). Providers are Deferred (TD-012).
+- **Tooling:** VS Code, Git, GitHub. FastAPI's built-in `/docs` page replaces Postman.
+- **Deliberately not used:** Docker (heavy on 8 GB RAM), local models, Celery or Redis, LangChain or LlamaIndex (the RAG pipeline is a few hundred lines; writing it ourselves means it is understood and has fewer dependencies).
+- Exact versions are pinned in Phase 1 from installs the owner has verified.
+
+## TD-002 Structure and layering (Accepted)
+
+- Monorepo: `frontend/`, `backend/`, `docs/`.
+- Backend layering: **routes → services → repositories and providers**. Routes never call an AI provider or the database directly.
+- Prompts live in `backend/app/prompts/` as separate, versioned files.
+- No provider SDK is imported outside `backend/app/providers/`.
+
+## TD-003 Persistence and data model (Accepted, draft schema)
+
+- SQLite is the source of truth for documents, chunk text and metadata, chats, summaries and jobs.
+- ChromaDB holds vectors plus minimal metadata and can always be rebuilt from SQLite.
+- PDFs live on disk at `backend/storage/users/<user_id>/documents/<uuid>.pdf`.
+
+Draft tables (key columns only):
+
+- `users`: id, email (nullable), password_hash (nullable), created_at.
+- `documents`: id, user_id, display_name, stored_filename (uuid), size_bytes, sha256, page_count, status, status_detail, index_profile_id, chunker_version, created_at. Unique on (user_id, sha256).
+- `chunks`: id, document_id, user_id, chunk_index, page_start, page_end, section, text, embedding_profile_id (nullable until embedded).
+- `embedding_profiles`: id, provider, model, dimensions, input_scheme, is_active, created_at.
+- `processing_jobs`: see TD-007.
+- `conversations`, `conversation_documents`, `messages`, `message_citations` (message_id, chunk_id, label).
+- `summaries`, `study_sets`: document_id, kind, content_json, prompt_version, created_at (Phases 7 and 8).
+
+## TD-004 Swappable embeddings, model tracking and re-indexing (Accepted)
+
+Requirement: change the embedding provider without rewriting the RAG pipeline; store model information; support re-indexing.
+
+1. The pipeline depends only on two interfaces. `EmbeddingProvider` has `embed_documents`, `embed_query`, `provider_id`, `model_name` and `dimensions`. `VectorStore` has `upsert`, `query`, `delete_by_document` and `count`.
+2. An `embedding_profiles` row identifies a provider, model, dimension count and input scheme. Exactly one profile is active, taken from `.env`.
+3. Every embedded chunk records its `embedding_profile_id`. Each profile has its own Chroma collection (`chunks_<profile_id>`), so vectors from different models can never be mixed. A dimension mismatch on write is a hard error.
+4. At startup the app compares `.env` with the active profile. If they differ, it registers the new profile and marks existing documents `needs_reindex`. It never mixes models silently.
+5. Search covers only documents indexed with the active profile. Others show "Needs re-index".
+6. A **re-index job** re-embeds the stored chunk text into the new collection. It does not re-read the PDF or re-chunk. Old vectors are deleted only after the new index for that document is complete, so a failure leaves the old index intact. Re-index is resumable (TD-007).
+7. Re-index can run per document or for all documents. It shows a chunk and token estimate first, because free-tier quotas are limited.
+8. Changing the chunking method is a separate "reprocess" action, tracked by `chunker_version`.
+9. Evaluation reports record the embedding profile (TD-008).
+
+## TD-005 RAG pipeline and citation integrity (Accepted)
+
+- **Ingestion:** validate, store under a UUID name, extract per page, flag pages without text, chunk within page boundaries (about 1,000 characters, small overlap, section taken from the PDF outline when present), embed in batches, mark ready.
+- **Answering:** rewrite the follow-up into a standalone question, search only the selected documents, apply a relevance gate (if nothing relevant, answer "not found" without calling the LLM), send labeled sources [S1]…[Sn] to the LLM, and require it to answer only from them.
+- **Citation integrity:** the model returns the labels it used. The backend validates them against the retrieved chunks and fills in the real document, page and verbatim snippet from the database. The model never writes page numbers. Messages store chunk IDs, not copied text.
+- Uploaded text is untrusted data (prompt-injection stance). The UI distinguishes quoted document text from AI-written explanation.
+- Chunk size, overlap and top-k are Provisional and tuned with the evaluation framework (TD-008).
+
+## TD-006 Document security (Accepted)
+
+**Upload validation** (server-side, before any processing):
+- Extension `.pdf` AND magic bytes `%PDF-` AND PyMuPDF can open it and finds at least one page. The client-declared MIME type is ignored.
+- The upload is streamed to a temporary file with a running size check, never loaded whole into memory.
+- Provisional defaults, all in `.env`: 25 MB per file, 500 pages per file, 50 documents and 500 MB per user.
+- Encrypted or password-protected PDFs are rejected with a clear message (v1).
+- Stored as `<uuid>.pdf`. The original name is sanitized and kept only as display metadata. It is never used to build a path.
+- SHA-256 per user: uploading an identical file returns the existing document instead of creating a duplicate.
+- PDFs are treated as untrusted input: text extraction only, nothing is executed. Isolating the parser in a separate process is reviewed in Phase 10.
+
+**Access control:**
+- Every request resolves a `current_user` dependency (TD-009). Repositories require a `user_id`, and unscoped query functions do not exist.
+- Another user's document returns 404, not 403, so existence is not leaked.
+- Vector queries always carry user and document filters, but only after ownership of the requested documents is verified in SQLite. The vector filter is a second layer.
+- PDFs are served only through an authenticated endpoint (no static folder), with `X-Content-Type-Options: nosniff`.
+- From Phase 3, isolation tests create a second user directly in the database and assert that no endpoint leaks across users, even before login exists.
+
+**Safe deletion** (a durable job, so it can resume after a crash):
+1. Mark the document `deleting`. It disappears from lists and search at once.
+2. Delete its vectors from every collection, then verify the count is zero.
+3. Delete the PDF file.
+4. Delete chunks, summaries, study sets and citations (database cascade).
+5. Delete the document row last.
+If any step fails, the document stays `deleting` and is retried, including by a startup sweep. Conversations about only that document are deleted with it. Citations elsewhere show "source removed".
+
+**Secrets and logging:** API keys live only in the backend `.env`. Document text and document-bearing prompts are never logged, and error messages never echo file contents.
+
+## TD-007 Durable document processing (Accepted, replaces BackgroundTasks)
+
+Requirement: survive restarts, track status, support retry, prevent duplicate processing.
+
+- **Queue:** a `processing_jobs` table plus one in-process worker started in the FastAPI lifespan. Concurrency is 1, which suits the i3 and API quotas.
+- **Job fields:** id, document_id, job_type (`ingest`, `reindex`, `delete`), status (`queued`, `running`, `succeeded`, `failed`), stage (`extract`, `chunk`, `embed`, `finalize`), attempts, max_attempts (default 3), error_code, error_message, heartbeat_at, timestamps.
+- **Duplicate prevention:** a partial unique index on (document_id, job_type) where status is `queued` or `running`. The worker claims a job with an atomic `UPDATE ... WHERE status='queued'` and proceeds only if exactly one row changed. Identical re-uploads are handled by TD-006.
+- **Restart recovery:** at startup, `running` jobs return to `queued` (attempts are kept, and jobs over the maximum become `failed`). A stale heartbeat (older than about 2 minutes) also counts as orphaned, which covers the `--reload` double-process case. Documents in `deleting` are resumed.
+- **Idempotent stages:** chunks are replaced in one transaction. The embed stage embeds only chunks that have no vector for the active profile. Chroma writes use `upsert` with deterministic IDs (`chunk_<id>`), so repeating a stage is safe.
+- **Retry:** transient errors (rate limit, network) retry automatically with exponential backoff up to the maximum. Permanent errors (corrupt file, encrypted file, no extractable text) fail with a readable message and no automatic retry. `POST /documents/{id}/retry` resumes a failed document from the failed stage.
+- **Status for the UI:** document status is `pending`, `processing`, `ready`, `failed`, `needs_reindex` or `deleting`, plus stage, progress (chunks embedded of total) and error. The frontend polls with TanStack Query.
+- SQLite runs in WAL mode with a busy timeout.
+
+## TD-008 RAG evaluation framework (Accepted, built from Phase 5)
+
+Location: `backend/evals/` with `datasets/` (JSONL cases), `fixtures/` (small self-authored or public-domain PDFs only), `run_eval.py`, `metrics.py` and `reports/`.
+
+**Case types:** answerable, unanswerable, follow-up (with history), injection (the document contains instructions), and multi-document later. Start with about 30 to 40 hand-written cases.
+
+**Metrics, cheapest first:**
+- **Retrieval quality:** hit@k, recall@k and MRR against expected pages. This needs embeddings only, no LLM calls.
+- **Answer accuracy:** required key facts present, by normalized string or regex match. An LLM judge is optional and off by default to save quota.
+- **Citation correctness:** validity (every cited label maps to a retrieved chunk, which must be 100%), page precision and recall against expected pages, and snippet support.
+- **Hallucination handling:** correct "not found" rate on unanswerable questions, false-refusal rate on answerable ones, and a check for numbers or names in the answer that appear in no retrieved chunk.
+
+**Rules:**
+- Evals call the same service functions as the app, never a separate code path.
+- Flags `--retrieval-only`, `--limit N` and `--dry-run` (estimates API calls) protect quotas.
+- Each report records the git commit, embedding profile, chunker version, prompt version and LLM model, and is compared against a committed baseline to catch regressions.
+- Pass targets are set after the first baseline run, not guessed now.
+- Placement: retrieval eval in Phase 5, answer, citation and hallucination eval in Phase 6, expansion in Phase 10.
+
+## TD-009 Single-user development, multi-user ready (Accepted)
+
+- `AUTH_MODE=single_user` is the only mode until Phase 9. The `users` table exists from the first migration with one seeded local user, and `get_current_user` returns it.
+- Every user-owned table has a non-null `user_id`. File paths include the user ID, and vector metadata carries it.
+- Phase 9 swaps the implementation of one dependency and adds password hashing, tokens, login and register screens, Alembic and rate limiting. It requires no data-model or service rewrite, and the Phase 3 isolation tests prove it.
+- Lightweight development: no Docker, no Redis, one worker, SQLite WAL, Vite dev server.
+
+## TD-010 Git and GitHub workflow (Accepted)
+
+- The repository is initialized in Phase 1 before any application code. The first commit is `.gitignore` plus a stub README.
+- The GitHub remote starts **private**. It becomes public in Phase 11 after a secret scan.
+- Gitignored: `.env`, `storage/`, virtual environments, `node_modules`, uploaded PDFs, Chroma data and eval reports (except the committed baseline). `.env.example` is committed.
+- `main` always works. Each milestone gets its own branch (for example `p1-backend-scaffold`), merged through a pull request. Docs-only fixes may go straight to `main` while the owner works alone. Once a collaborator joins, every change goes through a pull request (TD-013).
+- Commits follow Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`, `refactor:`), small and specific.
+- **Milestone Definition of Done:**
+  1. It works, verified by the owner running it.
+  2. Tests pass.
+  3. `PROJECT_STATE.md` and `TASKS.md` are updated, plus any other doc it affects.
+  4. It is committed with a meaningful message and pushed.
+  5. A phase-end tag `phase-N-complete` is created when a phase finishes.
+
+## TD-011 Working within free-plan usage limits (Accepted)
+
+- A milestone is one verifiable outcome, about 5 files at most, ending in a working state and a commit. Every milestone is a safe pause point.
+- Planning is just-in-time. The roadmap details the current phase's milestones and outlines later phases.
+- Complete code only for files created or changed. The owner pastes back errors or the last ~20 lines of output, and uses `git diff` for reviews.
+- `PROJECT_STATE.md` is updated at every milestone, so a usage limit never strands the project. A Handoff Report is produced on request and saved in `docs/handoffs/`.
+- **Verification honesty:** Claude's chat sandbox cannot install packages, so "verified" means the owner ran it and pasted the result. Anything else is labeled "written, not yet run".
+- Documents are created only when a milestone needs them.
+
+## TD-012 Deferred decisions
+
+| Decision | When | How |
+|---|---|---|
+| Embedding provider (for example Voyage AI or Gemini) | Phase 5 | Check live free-tier limits, then choose |
+| LLM provider | Phase 6 | Check live free-tier limits, then choose |
+| react-pdf vs simpler PDF viewer | Phase 6 | Try react-pdf first |
+| ChromaDB vs SQLite plus NumPy fallback | Phase 1 (P1.5) | Install spike on the owner's machine |
+| Chunk size, overlap, top-k | Phases 5 and 6 | Tune against evals |
+| Upload limit values | Phase 4 | Adjust after testing real PDFs |
+| Cross-origin auth method (tokens vs cookies) | Phase 9 | Decide with separate frontend and backend domains in mind (TD-014) |
+| Backend host (needs always-on process and a persistent disk) | Phase 11 | Re-check live pricing and limits, then choose (TD-014) |
+| Vercel plan vs making the repository public | Phase 11 | See TD-014 |
+
+## TD-013 Two-person Git workflow (Accepted, details Provisional)
+
+Context: the owner owns the GitHub repository `documind`. A friend joins as a collaborator and both contribute to the same repository.
+
+- **Ownership and timing:** the owner owns the repository. The friend is invited at the end of Phase 1, once `SETUP_GUIDE.md` exists, so they can set up the same environment from it. Each person sets their own GitHub noreply commit email.
+- **No direct pushes to `main`** once the collaborator joins. Every change is a branch, then a pull request, then review and merge by the *other* person.
+- **Enforcement:** GitHub's documentation says rulesets are available on GitHub Free only for public repositories, and for private repositories they need Pro or Team. We could not confirm from the documentation whether the older branch protection settings are available for private repositories on Free. Until we check the repository's Settings page, the rule is by agreement. Rulesets become available on Free when the repository goes public (Phase 11).
+- **Branch names:** `<yourname>/<milestone-id>-<topic>`, for example `sujal/p2-1-design-tokens`. One milestone has one author.
+- **Avoid collisions:** both agree in `TASKS.md` who is on which milestone before starting. Prefer splitting by area (`frontend/` and `backend/`).
+- **Shared files** (`PROJECT_STATE.md`, `TASKS.md`, `TECHNICAL_DECISIONS.md`): updated only inside the pull request that completes a milestone, after pulling the latest `main`. Changes to `TECHNICAL_DECISIONS.md` need both people to agree in the pull request.
+- **Claude sessions:** each person uses their own Claude account and usage limits. `PROJECT_STATE.md` in the repository is the shared handoff, pasted into a fresh chat.
+- **Commits:** Conventional Commits, meaningful messages, authored under each person's own GitHub account so the contribution history is accurate for both.
+
+## TD-014 Deployment plan, constraints and guardrails (Plan Accepted, hosts Deferred, nothing deployed before Phase 11)
+
+Plan: GitHub holds the source. Vercel hosts the React + Vite frontend (the `frontend/` folder set as the project root). A separate host runs the FastAPI backend, the background worker and the persistent data. One live URL is shared in both LinkedIn posts.
+
+**Constraints found on 2026-11-21 (from the providers' own documentation and comparison articles; re-check before deploying):**
+- **Vercel Hobby and collaborators:** Vercel's documentation says the Hobby plan does not support collaboration for private repositories, and that a commit is deployed only if its author is the owner of the Hobby team. Collaboration is free for public repositories, and Pro is the paid alternative. Plan: make the repository public in Phase 11 (already planned, after a secret scan), or use Pro. Vercel is not involved before then.
+- **Vercel cannot host the backend.** The backend needs an always-on process (the in-process worker, TD-007), a persistent disk (SQLite, uploaded PDFs, ChromaDB), and exactly one running instance (single SQLite writer, single worker).
+- **Free backend hosting is weak for that shape.** Per a Render article and a comparison page: Render's free web services sleep after 15 minutes idle and no free persistent disk is listed; its free Postgres expires after 30 days. Railway's free plan has a small monthly credit and a 0.5 GB volume, and a paid plan of about $5 per month is recommended for persistent uptime. Fly.io has no free tier for new users. Oracle Cloud's Always Free VM exists but needs a credit card and self-management. The Phase 11 decision is between a small paid plan and a free tier with visible trade-offs. TD-007 restart recovery means a sleeping or restarted worker does not lose jobs.
+- **Architecture unchanged.** TD-001 already names PostgreSQL as the later path. If no suitable host offers a persistent volume, switching storage would be a new decision recorded here.
+
+**Guardrails before any public URL exists:**
+1. Phase 9 authentication is complete. `AUTH_MODE=single_user` must never be exposed publicly, because anyone could read the seeded user's documents and spend the owner's API quota.
+2. Per-user daily limits on uploads, questions and re-indexing, tighter upload sizes for the demo, a quota cap, and friendly handling of provider rate-limit errors.
+3. A visible notice that uploaded text is sent to third-party AI providers, with working document deletion (TD-006).
+4. Secrets only as host environment variables. The frontend receives only `VITE_API_BASE_URL`, which is public by design. Never put keys in `VITE_` variables. Backend CORS allows only the Vercel domain(s). HTTPS only.
+5. The frontend never hardcodes `localhost`: the API address comes from `VITE_API_BASE_URL` starting in P1.7.
+6. Frontend and backend run on different domains, so the token-versus-cookie decision (SameSite, CORS credentials) is made in Phase 9 with that in mind.
+7. Deployment files and a `DEPLOYMENT.md` are written in Phase 11, with separate development and production configuration.
