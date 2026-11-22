@@ -1,6 +1,6 @@
 # DocuMind: Development Roadmap
 
-Last updated: 2026-11-21
+Last updated: 2026-11-22
 
 ## How to read this
 
@@ -33,7 +33,7 @@ Delivered: architecture, RAG pipeline design, folder structure, risk list, workf
 
 Rule for this phase: one installation or configuration step at a time, each command explained, wait for the owner's confirmation. No software is assumed installed until the owner confirms.
 
-**Progress (2026-11-21):** P1.1 to P1.4 done. P1.5 to P1.7 not started.
+**Progress (2026-11-22):** P1.1 to P1.5 done. P1.6 and P1.7 not started.
 
 | ID | Milestone | Outcome |
 |---|---|---|
@@ -41,11 +41,11 @@ Rule for this phase: one installation or configuration step at a time, each comm
 | P1.2 | Git and GitHub identity | Git configured, GitHub sign-in working, empty private `documind` repository created |
 | P1.3 | Repository skeleton and first commit | `.gitignore`, stub `README.md`, `TASKS.md`, `PROJECT_STATE.md` and the decision docs committed and pushed (the `frontend/` and `backend/` folders appear with their first files, because Git does not track empty folders) |
 | P1.4 | Backend scaffold | Python 3.12 virtual environment, FastAPI `/health` endpoint, first pytest passing |
-| P1.5 | Dependency spike | PyMuPDF and ChromaDB install and import checked on the owner's machine (retires the Windows install risk) |
+| P1.5 | Dependency spike | PyMuPDF and ChromaDB install, import and a real functional check on the owner's machine (retires the Windows install risk). Done: ChromaDB kept, PyMuPDF 1.28.2 pinned (TD-016) |
 | P1.6 | Frontend scaffold | Vite, React, TypeScript, Tailwind and Lucide running in the browser |
-| P1.7 | Connect and close the phase | Frontend calls backend `/health` using an API address from the `VITE_API_BASE_URL` environment variable (never hardcoded, TD-014), backend allowed origins read from configuration, `SETUP_GUIDE.md` written from the confirmed steps, collaborator invited (TD-013), `PROJECT_STATE.md` updated, tag `phase-1-complete` |
+| P1.7 | Connect and close the phase | Frontend calls backend `/health` using an API address from the `VITE_API_BASE_URL` environment variable (never hardcoded, TD-014), backend allowed origins read from configuration, `SETUP_GUIDE.md` written from the confirmed steps, PyMuPDF licence decision made (TD-017), collaborator invited (TD-013), `PROJECT_STATE.md` updated, tag `phase-1-complete` |
 
-Exit criteria: both servers run on the owner's laptop, the repository is on GitHub, setup is documented, and the ChromaDB decision is made.
+Exit criteria: both servers run on the owner's laptop, the repository is on GitHub, setup is documented, the ChromaDB decision is made (done, TD-016), and the PyMuPDF licence decision is made (TD-017).
 
 ## Phase 2: Frontend design and implementation (outline)
 
@@ -70,7 +70,7 @@ The UI is built against a typed mock-data layer that mirrors the planned API sha
 
 - P4.1 Upload validation, limits and duplicate detection (TD-006).
 - P4.2 Job queue, worker, restart recovery and duplicate-job prevention (TD-007), with tests that simulate a restart.
-- P4.3 PyMuPDF extraction, page metadata and scanned-PDF detection.
+- P4.3 PDF extraction behind an interface (PyMuPDF today, see TD-017), page metadata and scanned-PDF detection.
 - P4.4 Page-aware chunker.
 - P4.5 Status, progress and retry endpoints plus UI.
 - P4.6 Safe deletion job (files and database; vector step added in Phase 5).
@@ -115,8 +115,8 @@ Expand evals, test large and malformed PDFs, test re-indexing and restart recove
 
 Nothing is deployed before this phase, and not before Phases 9 and 10 are complete (TD-014).
 
-- P11.1 Secret scan, repository made public (this also makes Vercel collaboration free and unlocks rulesets on GitHub Free).
-- P11.2 Choose and set up the backend host after re-checking live pricing: persistent volume, one instance, environment variables.
+- P11.1 Secret scan, repository made public (this also makes Vercel collaboration free and unlocks rulesets on GitHub Free). A `LICENSE` file that matches the TD-017 decision is in place.
+- P11.2 Choose and set up the backend host after re-checking live pricing: persistent volume, one instance, environment variables, and enough memory and disk for ChromaDB (TD-016).
 - P11.3 Deploy the backend, with CORS limited to the frontend domain, then check `/health` and a restart-recovery test.
 - P11.4 Deploy the frontend on Vercel (`frontend/` as the root directory, `VITE_API_BASE_URL` set).
 - P11.5 Demo guardrails: per-user quotas, upload limits, data notice.

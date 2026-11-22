@@ -1,6 +1,6 @@
 # DocuMind: Technical Decisions
 
-Last updated: 2026-11-21 (collaboration and deployment plans recorded)
+Last updated: 2026-11-22 (P1.5 results recorded)
 
 Status legend: **Accepted** = approved by the owner. **Provisional** = sensible default, to be tuned or verified. **Deferred** = decided later, after live checks.
 
@@ -10,6 +10,7 @@ Status legend: **Accepted** = approved by the owner. **Provisional** = sensible 
 - 2026-11-20: TD-007 **replaces** the earlier plan to use FastAPI BackgroundTasks. BackgroundTasks do not survive a restart, so we use a database-backed job queue with one in-process worker.
 - 2026-11-21: Collaboration and deployment plans recorded as TD-013 (two-person Git workflow) and TD-014 (deployment constraints and guardrails). The approved architecture is unchanged. TD-010 gains one rule: once a collaborator joins, nothing goes straight to `main`.
 - 2026-11-21: P1.4 findings recorded as TD-015 (Windows development conventions: run Python tools as `python -m`, `httpx2` as the test client). TD-013 gains the merge-method rule.
+- 2026-11-22: P1.5 findings recorded as TD-016 (ChromaDB kept, PyMuPDF 1.28.2 pinned, dependency check script) and TD-017 (PyMuPDF licence, decision open). TD-012 updated. TD-001, TD-014 and TD-015 gain one note each.
 
 ---
 
@@ -17,8 +18,8 @@ Status legend: **Accepted** = approved by the owner. **Provisional** = sensible 
 
 - **Frontend:** React, TypeScript, Vite, Tailwind CSS, Lucide Icons, React Router, TanStack Query, react-pdf (PDF preview and jump to page; confirm in Phase 6).
 - **Backend:** Python 3.12, FastAPI, Uvicorn, Pydantic, SQLAlchemy 2.x, pytest. Alembic migrations are added in Phase 9, when the schema has settled.
-- **Document processing:** PyMuPDF (text per page, page metadata, PDF outline).
-- **Storage:** SQLite in WAL mode now, PostgreSQL later through SQLAlchemy. ChromaDB (embedded) for vectors.
+- **Document processing:** PyMuPDF 1.28.2 (text per page, page metadata, PDF outline). Its licence is AGPL-3.0 or commercial, see TD-017.
+- **Storage:** SQLite in WAL mode now, PostgreSQL later through SQLAlchemy. ChromaDB 1.5.9 (embedded) for vectors, confirmed in P1.5 (TD-016).
 - **AI:** hosted LLM and hosted embeddings behind provider interfaces (TD-004). Providers are Deferred (TD-012).
 - **Tooling:** VS Code, Git, GitHub. FastAPI's built-in `/docs` page replaces Postman.
 - **Deliberately not used:** Docker (heavy on 8 GB RAM), local models, Celery or Redis, LangChain or LlamaIndex (the RAG pipeline is a few hundred lines; writing it ourselves means it is understood and has fewer dependencies).
@@ -166,7 +167,8 @@ Location: `backend/evals/` with `datasets/` (JSONL cases), `fixtures/` (small se
 | Embedding provider (for example Voyage AI or Gemini) | Phase 5 | Check live free-tier limits, then choose |
 | LLM provider | Phase 6 | Check live free-tier limits, then choose |
 | react-pdf vs simpler PDF viewer | Phase 6 | Try react-pdf first |
-| ChromaDB vs SQLite plus NumPy fallback | Phase 1 (P1.5) | Install spike on the owner's machine |
+| ChromaDB vs SQLite plus NumPy fallback | Phase 1 (P1.5) | **Resolved 2026-11-22: ChromaDB 1.5.9 kept** (TD-016). The fallback stays possible behind `VectorStore` |
+| PyMuPDF licence: keep it with an AGPL-3.0 repository, or switch to a permissive PDF library | Before the collaborator is invited (P1.7) | See TD-017 |
 | Chunk size, overlap, top-k | Phases 5 and 6 | Tune against evals |
 | Upload limit values | Phase 4 | Adjust after testing real PDFs |
 | Cross-origin auth method (tokens vs cookies) | Phase 9 | Decide with separate frontend and backend domains in mind (TD-014) |
@@ -196,6 +198,8 @@ Plan: GitHub holds the source. Vercel hosts the React + Vite frontend (the `fron
 - **Vercel cannot host the backend.** The backend needs an always-on process (the in-process worker, TD-007), a persistent disk (SQLite, uploaded PDFs, ChromaDB), and exactly one running instance (single SQLite writer, single worker).
 - **Free backend hosting is weak for that shape.** Per a Render article and a comparison page: Render's free web services sleep after 15 minutes idle and no free persistent disk is listed; its free Postgres expires after 30 days. Railway's free plan has a small monthly credit and a 0.5 GB volume, and a paid plan of about $5 per month is recommended for persistent uptime. Fly.io has no free tier for new users. Oracle Cloud's Always Free VM exists but needs a credit card and self-management. The Phase 11 decision is between a small paid plan and a free tier with visible trade-offs. TD-007 restart recovery means a sleeping or restarted worker does not lose jobs.
 - **Architecture unchanged.** TD-001 already names PostgreSQL as the later path. If no suitable host offers a persistent volume, switching storage would be a new decision recorded here.
+- **ChromaDB's size (found in P1.5, TD-016).** It brings dozens of dependencies. That is fine on the owner's laptop, but at P11.2 check that the chosen host has enough memory and disk for the backend with ChromaDB loaded. The `VectorStore` interface (TD-004) allows a lighter store if needed.
+- **PyMuPDF licence (TD-017).** A public network deployment is the case the AGPL covers, so that decision is made before Phase 11 and before the collaborator is invited.
 
 **Guardrails before any public URL exists:**
 1. Phase 9 authentication is complete. `AUTH_MODE=single_user` must never be exposed publicly, because anyone could read the seeded user's documents and spend the owner's API quota.
@@ -211,6 +215,31 @@ Plan: GitHub holds the source. Vercel hosts the React + Vite frontend (the `fron
 Found while building P1.4 on Windows 11 Home with Smart App Control active (2026-11-21).
 
 - **Run Python tools as modules:** `python -m pip`, `python -m pytest`, `python -m uvicorn`. Windows 11's Smart App Control blocked `pip.exe`, one of the small unsigned launcher programs that virtual environments generate, with the message "An Application Control policy has blocked this file". `pytest.exe` and `uvicorn.exe` are the same kind of launcher, so we avoid all of them. `python.exe` is signed and allowed, so the module form works. The compiled packages (pydantic-core, watchfiles, httptools) loaded without problems on the owner's machine. Do not turn off Windows security to work around this.
-- **Test client:** `httpx2` (2.16.2) is pinned in `requirements-dev.txt`, not `httpx`. Starlette's `TestClient` now tries `httpx2` first and warns that using `httpx` is deprecated. `httpx2` is a fork of httpx 0.28.1 with the same public API and needs Python 3.11 or newer.
+- **Test client:** `httpx2` (2.16.2) is pinned in `requirements-dev.txt`, not `httpx`. Starlette's `TestClient` now tries `httpx2` first and warns that using `httpx` is deprecated. `httpx2` is a fork of httpx 0.28.1 with the same public API and needs Python 3.11 or newer. Since P1.5, ChromaDB's dependencies install `httpx` 0.28.1 again next to `httpx2`. Starlette still prefers `httpx2`, and pytest showed no warning in a freshly rebuilt environment (2026-11-22).
 - **Virtual environment:** `backend/.venv`, created with `py -3.12` (Python 3.12.10) because the machine's default `python` is 3.15. Activation with `.\.venv\Scripts\Activate.ps1` worked without changing PowerShell's script policy.
 - **Pinning:** `requirements.txt` pins only the packages we use directly. Their dependencies float within compatible ranges.
+
+## TD-016 Vector store and PDF library confirmed (Accepted)
+
+Found while running the P1.5 dependency spike on the owner's laptop (Windows 11 Home, Python 3.12.10), 2026-11-21 and 2026-11-22. It settles the ChromaDB row of TD-012.
+
+- **ChromaDB 1.5.9 is kept.** It installed from a prebuilt Windows wheel with no compiler and nothing blocked, then passed a functional check run by `backend/scripts/check_dependencies.py`: three vectors written by one Python process, the folder reopened by a second process (restart persistence), a nearest-neighbour search that returned the right id, metadata and text, and deletion by a `document_id` filter, which is the operation safe deletion needs (TD-006). The SQLite plus NumPy fallback is not needed now. The `VectorStore` interface (TD-004) stays, so we can still switch.
+- **Telemetry is off.** The check opens ChromaDB with `anonymized_telemetry=False`. The application must do the same when it opens the store in Phase 5.
+- **Size.** ChromaDB pulls in dozens of dependencies (among them grpcio, kubernetes, opentelemetry, onnxruntime and tokenizers). We use none of the AI parts, because embeddings come from a provider (TD-004). The size is fine on the laptop and is a check at P11.2 (TD-014).
+- **PyMuPDF is pinned to 1.28.2.** PyMuPDF 2.1 was tried first and pulled in heavy extra dependencies. A `pip install --dry-run` showed 1.28.2 needs none. It passed the check: a 2-page PDF with an outline was created, saved, reopened, and its text and outline read back.
+- **Repeatable proof.** `python scripts/check_dependencies.py` prints one `PASS` or `FAIL` line per library. A new library gets one function and one line in `CHECKS`.
+- **Reproducibility proven.** The virtual environment was deleted and rebuilt from `requirements-dev.txt` alone, and the checks and pytest all passed. The requirements files are complete for this machine.
+
+## TD-017 PyMuPDF licence (Provisional, decision due before the collaborator is invited)
+
+Facts, from Artifex's licensing documentation read on 2026-11-21 (not legal advice; re-read the current terms before deciding): PyMuPDF is dual-licensed under the GNU AGPL-3.0 or a commercial licence from Artifex. Artifex states that offering software built on it as a network service requires making the full source of that software available under the AGPL, unless a commercial licence is bought. DocuMind is planned as a public network service (TD-014), so the question applies from Phase 11.
+
+Options:
+- **A. Keep PyMuPDF and release DocuMind under AGPL-3.0.** The repository becomes public in Phase 11 anyway, so publishing the source costs a portfolio project nothing. Consequence: the AGPL then applies to our code and to anyone who reuses it.
+- **B. Switch to a library with a permissive licence** (for example pypdf or pdfminer.six). That allows a permissive licence such as MIT for our code. Consequence: re-test text quality, page metadata, outline support, speed and scanned-page detection, and redo the P1.5 check.
+
+Current lean: A. Not final.
+
+Guardrails that hold either way:
+- PDF extraction is built behind an interface in Phase 4 (P4.3), with no PyMuPDF import outside it, so switching later is one adapter.
+- Decide before the collaborator is invited (P1.7), because the licence changes what contributors are agreeing to, and before the repository is made public (P11.1). Add a matching `LICENSE` file when decided.
