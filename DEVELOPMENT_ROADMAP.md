@@ -1,6 +1,6 @@
 # DocuMind: Development Roadmap
 
-Last updated: 2026-11-22
+Last updated: 2026-11-23
 
 ## How to read this
 
@@ -33,7 +33,7 @@ Delivered: architecture, RAG pipeline design, folder structure, risk list, workf
 
 Rule for this phase: one installation or configuration step at a time, each command explained, wait for the owner's confirmation. No software is assumed installed until the owner confirms.
 
-**Progress (2026-11-22):** P1.1 to P1.5 done. P1.6 and P1.7 not started.
+**Progress (2026-11-23):** P1.1 to P1.6 done. P1.7 not started.
 
 | ID | Milestone | Outcome |
 |---|---|---|
@@ -42,8 +42,8 @@ Rule for this phase: one installation or configuration step at a time, each comm
 | P1.3 | Repository skeleton and first commit | `.gitignore`, stub `README.md`, `TASKS.md`, `PROJECT_STATE.md` and the decision docs committed and pushed (the `frontend/` and `backend/` folders appear with their first files, because Git does not track empty folders) |
 | P1.4 | Backend scaffold | Python 3.12 virtual environment, FastAPI `/health` endpoint, first pytest passing |
 | P1.5 | Dependency spike | PyMuPDF and ChromaDB install, import and a real functional check on the owner's machine (retires the Windows install risk). Done: ChromaDB kept, PyMuPDF 1.28.2 pinned (TD-016) |
-| P1.6 | Frontend scaffold | Vite, React, TypeScript, Tailwind and Lucide running in the browser |
-| P1.7 | Connect and close the phase | Frontend calls backend `/health` using an API address from the `VITE_API_BASE_URL` environment variable (never hardcoded, TD-014), backend allowed origins read from configuration, `SETUP_GUIDE.md` written from the confirmed steps, PyMuPDF licence decision made (TD-017), collaborator invited (TD-013), `PROJECT_STATE.md` updated, tag `phase-1-complete` |
+| P1.6 | Frontend scaffold | Vite, React, TypeScript, Tailwind and Lucide running in the browser. Done: placeholder page, lint and production build checked (TD-018) |
+| P1.7 | Connect and close the phase | Frontend calls backend `/health` using an API address from the `VITE_API_BASE_URL` environment variable (never hardcoded, TD-014), backend allowed origins read from configuration, a clean install of both sides rehearsed (`npm ci` and the Python rebuild), `SETUP_GUIDE.md` written from the confirmed steps, PyMuPDF licence decision made (TD-017), collaborator invited (TD-013), `PROJECT_STATE.md` updated, tag `phase-1-complete` |
 
 Exit criteria: both servers run on the owner's laptop, the repository is on GitHub, setup is documented, the ChromaDB decision is made (done, TD-016), and the PyMuPDF licence decision is made (TD-017).
 

@@ -1,6 +1,6 @@
 # DocuMind: Tasks
 
-Last updated: 2026-11-22
+Last updated: 2026-11-23
 
 Shared task tracker (see TD-013 in `TECHNICAL_DECISIONS.md`). Before starting a milestone, put your name in the Owner column inside your pull request. One milestone has one owner. Status is Todo, In progress or Done.
 
@@ -15,7 +15,7 @@ The full plan for every phase is in `DEVELOPMENT_ROADMAP.md`. The current state 
 | P1.3 | Repository skeleton and first commit | Sujal | Done |
 | P1.4 | Backend scaffold (virtual environment, `/health`, first pytest) | Sujal | Done |
 | P1.5 | Dependency spike (PyMuPDF, ChromaDB) | Sujal | Done |
-| P1.6 | Frontend scaffold (Vite, React, TypeScript, Tailwind, Lucide) | Sujal | Todo |
+| P1.6 | Frontend scaffold (Vite, React, TypeScript, Tailwind, Lucide) | Sujal | Done |
 | P1.7 | Connect frontend to backend, `SETUP_GUIDE.md`, PyMuPDF licence decision, invite collaborator, tag `phase-1-complete` | Sujal | Todo |
 
 ## Decisions waiting

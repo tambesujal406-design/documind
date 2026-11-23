@@ -1,6 +1,6 @@
 # DocuMind: PROJECT STATE
 
-Last updated: 2026-11-22
+Last updated: 2026-11-23
 
 **How to use this file:** paste it at the start of any new Claude conversation, together with any files being changed. A new conversation must not be assumed to know anything about the project. Once the repository has a collaborator, this file is shared: update it only in the pull request that completes a milestone (TD-013).
 
@@ -8,9 +8,9 @@ Last updated: 2026-11-22
 Phase 1: Project initialization and environment setup. Phase 0 is complete and approved.
 
 ## Current task
-**P1.5 Dependency spike (PyMuPDF, ChromaDB) is finished on branch `sujal/p1-5-dependency-spike` and is waiting for its pull request to be merged.** This file describes the state as of that merge. Remaining owner steps: commit and push the documentation update, open the pull request, merge it with "Create a merge commit", delete the branch, update local `main`.
-After that the next task is **P1.6 Frontend scaffold**. First step: create branch `sujal/p1-6-frontend-scaffold`, then scaffold the Vite, React and TypeScript app in `frontend/`.
-P1.4 was merged earlier by pull request #1 (merge commit `e6f6787`).
+**P1.6 Frontend scaffold is finished on branch `sujal/p1-6-frontend-scaffold` and is waiting for its pull request to be merged.** This file describes the state as of that merge. Remaining owner steps: commit and push the documentation update, open the pull request, merge it with "Create a merge commit", delete the branch, update local `main`.
+After that the next task is **P1.7 Connect and close Phase 1**. First step: create branch `sujal/p1-7-connect-and-setup-guide`, then add the API address setting (`VITE_API_BASE_URL`) and make the frontend call the backend's `GET /health`.
+P1.5 was merged earlier by pull request #2 (merge commit `8320643`).
 
 ## Milestone progress (Phase 1)
 | ID | Milestone | Status |
@@ -19,8 +19,8 @@ P1.4 was merged earlier by pull request #1 (merge commit `e6f6787`).
 | P1.2 | Git and GitHub identity | Done |
 | P1.3 | Repository skeleton and first commit | Done |
 | P1.4 | Backend scaffold | Done |
-| P1.5 | Dependency spike (PyMuPDF, ChromaDB) | Done (pending merge) |
-| P1.6 | Frontend scaffold | Not started |
+| P1.5 | Dependency spike (PyMuPDF, ChromaDB) | Done |
+| P1.6 | Frontend scaffold | Done (pending merge) |
 | P1.7 | Connect, setup guide, licence decision, invite collaborator, close phase | Not started |
 
 ## Completed
@@ -28,18 +28,20 @@ P1.4 was merged earlier by pull request #1 (merge commit `e6f6787`).
 - P1.1: every tool below was checked and confirmed by the owner, one step at a time.
 - P1.2: Git identity set, GitHub email privacy switched on, private repository created.
 - P1.3: project folder, Git repository, remote `origin`, `.gitignore`, `README.md` (commit `f85128b`) and the project documents with `TASKS.md` (commit `9fc6099`), both pushed to GitHub.
-- P1.4: `backend/` folder, Python 3.12 virtual environment, FastAPI app with `GET /health`, first pytest passing, server run and `/health` and `/docs` checked in the browser by the owner. Merged into `main` by pull request #1 (feature commit `c41ed55`, merge commit `e6f6787`).
-- P1.5: PyMuPDF 1.28.2 and ChromaDB 1.5.9 installed, pinned and proven by `backend/scripts/check_dependencies.py`. ChromaDB is kept (TD-016). The PyMuPDF licence question is recorded as an open decision (TD-017). The virtual environment was deleted and rebuilt from `requirements-dev.txt` alone, and every check passed. Feature commit `d3da4e9` on branch `sujal/p1-5-dependency-spike`.
-- Product features: none yet. The backend exposes only `GET /health`.
+- P1.4: `backend/` folder, Python 3.12 virtual environment, FastAPI app with `GET /health`, first pytest passing, server run and `/health` and `/docs` checked in the browser by the owner. Merged by pull request #1 (feature commit `c41ed55`, merge commit `e6f6787`).
+- P1.5: PyMuPDF 1.28.2 and ChromaDB 1.5.9 installed, pinned and proven by `backend/scripts/check_dependencies.py`. ChromaDB is kept (TD-016). The PyMuPDF licence question is recorded as an open decision (TD-017). The virtual environment was deleted and rebuilt from `requirements-dev.txt` alone, and every check passed. Merged by pull request #2 (feature commit `d3da4e9`, docs commit `340a6a9`, merge commit `8320643`).
+- P1.6: `frontend/` app generated with create-vite 9.3.4 (React and TypeScript), Tailwind CSS 4.3.5 added as a Vite plugin, lucide-react 1.78.0 added, starter demo files removed, own favicon and page title added. A placeholder page proves all of it. Lint, production build and a preview of the built app all checked by the owner. Feature commit `7886dda` on branch `sujal/p1-6-frontend-scaffold` (TD-018).
+- Product features: none yet. The backend exposes only `GET /health`. The frontend shows a placeholder page.
 
 ## Files created or modified
-On `main` (pushed): `.gitignore`, `README.md`, `TECHNICAL_DECISIONS.md`, `DEVELOPMENT_ROADMAP.md`, `PROJECT_STATE.md`, `TASKS.md`, and the P1.4 files `backend/app/__init__.py` (empty), `backend/app/main.py` (FastAPI app and `/health`), `backend/tests/test_health.py`, `backend/requirements.txt`, `backend/requirements-dev.txt`.
+On `main` (pushed): `.gitignore`, `README.md`, `TECHNICAL_DECISIONS.md`, `DEVELOPMENT_ROADMAP.md`, `PROJECT_STATE.md`, `TASKS.md`, and the backend: `backend/app/__init__.py` (empty), `backend/app/main.py` (FastAPI app and `/health`), `backend/tests/test_health.py`, `backend/requirements.txt`, `backend/requirements-dev.txt`, `backend/scripts/check_dependencies.py`.
 
-Added or changed by P1.5 (branch `sujal/p1-5-dependency-spike`):
-- `backend/scripts/check_dependencies.py` (new) and `backend/requirements.txt` (pins `pymupdf` and `chromadb`), commit `d3da4e9`.
-- Updated in the P1.5 documentation commit: `PROJECT_STATE.md`, `TASKS.md`, `DEVELOPMENT_ROADMAP.md`, `TECHNICAL_DECISIONS.md`.
+Added by P1.6 (branch `sujal/p1-6-frontend-scaffold`, commit `7886dda`), all in `frontend/`:
+- `package.json`, `package-lock.json` (exact versions), `index.html`, `vite.config.ts`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `.oxlintrc.json`, `.gitignore`.
+- `public/favicon.svg` (own icon), `src/main.tsx`, `src/index.css` (the Tailwind import), `src/App.tsx` (placeholder page).
+- Updated in the P1.6 documentation commit: `PROJECT_STATE.md`, `TASKS.md`, `DEVELOPMENT_ROADMAP.md`, `TECHNICAL_DECISIONS.md`.
 
-Local only, never committed: `backend/.venv/` (gitignored).
+Local only, never committed: `backend/.venv/`, `frontend/node_modules/`, `frontend/dist/` (all gitignored).
 
 ## Architecture (summary, unchanged)
 - React + TypeScript + Vite frontend; FastAPI backend (routes, services, repositories and providers).
@@ -65,7 +67,7 @@ Confirmed installed on the owner's laptop (Windows 11 Home Single Language, 64-b
 | Python | 3.12.10 | Use `py -3.12` for DocuMind. Also installed: 3.15.2 (default), 3.14, 3.13 (Store) |
 | Node.js | 24.22.3 | Vite 8 needs 20.19+ or 22.12+ |
 | npm | 11.19.1 | |
-| VS Code | 1.147.0 (x64) | Extensions installed: Python, Pylance, ESLint, Tailwind CSS IntelliSense (plus Claude Code, Live Server) |
+| VS Code | 1.147.0 (x64) | Extensions installed: Python, Pylance, ESLint, Tailwind CSS IntelliSense (plus Claude Code, Live Server). The frontend uses Oxlint, so the ESLint extension is unused there (TD-018) |
 
 Backend packages in `backend/.venv`, pinned in `backend/requirements.txt` and `backend/requirements-dev.txt`:
 | Package | Version | Purpose |
@@ -78,16 +80,36 @@ Backend packages in `backend/.venv`, pinned in `backend/requirements.txt` and `b
 | httpx2 | 2.16.2 | Used by Starlette's `TestClient` (dev, see TD-015) |
 
 Installed automatically and not pinned directly: pydantic 2.14.4, starlette 1.10.0, numpy 2.5.5, onnxruntime 1.32.0, and dozens more, mostly ChromaDB's dependencies. `httpx` 0.28.1 is among them (ChromaDB needs it) and sits next to `httpx2` without causing a warning.
-Not installed yet: frontend packages.
+
+Frontend packages in `frontend/node_modules`, exact versions locked in `frontend/package-lock.json` (`package.json` uses ranges):
+| Package | Version | Purpose |
+|---|---|---|
+| vite | 8.3.8 | Dev server and build |
+| react, react-dom | 19.3.1 | UI library |
+| typescript | 7.0.2 | Type checking (`tsc -b` runs before every build) |
+| tailwindcss, @tailwindcss/vite | 4.3.5 | Styling, as a Vite plugin (no config file) |
+| lucide-react | 1.78.0 | Icons |
+| @vitejs/plugin-react | 6.3.0 | React support in Vite |
+| oxlint | 1.94.0 | Code checker (the template's default, TD-018) |
+| @types/react, @types/react-dom, @types/node | 19.3.0, 19.3.0, 24.19.2 | Type definitions |
+
+Not installed yet (added when a screen needs them): React Router, TanStack Query, react-pdf.
 
 ## Commands to run the application
-Run these in PowerShell from `C:\dev\documind\backend`.
+Backend: run in PowerShell from `C:\dev\documind\backend`.
 - Activate the virtual environment (once per terminal window; the prompt then shows `(.venv)`): `.\.venv\Scripts\Activate.ps1`
-- Run the API: `python -m uvicorn app.main:app --reload`, then open http://127.0.0.1:8000/health and http://127.0.0.1:8000/docs. Stop it with `Ctrl+C`.
+- Run the API (port 8000): `python -m uvicorn app.main:app --reload`, then open http://127.0.0.1:8000/health and http://127.0.0.1:8000/docs. Stop it with `Ctrl+C`.
 - Run the tests: `python -m pytest`
 - Check that PyMuPDF and ChromaDB really work on this machine: `python scripts/check_dependencies.py` (expect two `PASS` lines and `All checks passed`)
 - Rebuild the environment (proven on 2026-11-22): `deactivate`, `Remove-Item -Recurse -Force .venv`, `py -3.12 -m venv .venv`, `.\.venv\Scripts\Activate.ps1`, `python -m pip install -r requirements-dev.txt`
 - Always run Python tools as `python -m ...` (TD-015).
+
+Frontend: run in PowerShell from `C:\dev\documind\frontend`. The Python environment does not need to be active.
+- Install packages (first time, or after `package.json` changes): `npm install`
+- Run the app (port 5173): `npm run dev`, then open http://localhost:5173/. Stop it with `Ctrl+C`.
+- Check the code: `npm run lint`
+- Build the production version into `dist/`: `npm run build`
+- Serve the built version (port 4173): `npm run preview`
 
 ## Tests performed and results
 - 2026-11-21: `python -m pytest` gave `1 passed` with no warnings (`tests/test_health.py`).
@@ -95,13 +117,16 @@ Run these in PowerShell from `C:\dev\documind\backend`.
 - 2026-11-21: PyMuPDF 1.28.2 passed the check (made a 2-page PDF with an outline, saved it, reopened it, read the text and outline). ChromaDB 1.5.9 installed from a prebuilt Windows wheel and imported.
 - 2026-11-22: `python scripts/check_dependencies.py` gave `PASS PyMuPDF` and `PASS ChromaDB` (stored 3 vectors, kept them across a restart in a separate process, found the nearest, deleted one document's vectors), then `All checks passed`. `python -m pytest` gave `1 passed` with no warnings.
 - 2026-11-22: the virtual environment was deleted and rebuilt from `requirements-dev.txt` alone. The same checks and pytest passed again, so the requirements files are complete.
-- Not tested: the dependency check ran only on the owner's laptop (Windows, Python 3.12.10). The collaborator's machine and the future backend host are untested.
+- 2026-11-22: `npm install` added 28 packages with 0 vulnerabilities. `npm run dev` started Vite 8.3.8 and the owner confirmed the starter page loaded at http://localhost:5173/ and its counter button worked. After adding Tailwind, the owner confirmed the placeholder page was styled (centered, bold heading, rounded badge).
+- 2026-11-23: after adding lucide-react, the owner confirmed the icon tile renders. `npm run lint` gave 0 warnings and 0 errors. `npm run build` passed (2132 modules transformed; JavaScript 223.73 kB, 70.39 kB gzipped; CSS 8.14 kB). `npm run preview` served the built app at http://localhost:4173/ and the owner confirmed the page, the `DocuMind` title and the 412-byte favicon file. The unused starter files were gone.
+- Not tested: the dependency checks ran only on the owner's laptop (Windows, Python 3.12.10, Node 24.22.3). The collaborator's machine and the future backend host are untested. A clean frontend install from the lock file (`npm ci`) has not been run yet; it is planned for P1.7. The frontend has no automated tests yet.
 
 ## Known bugs and unresolved issues
 - No known bugs.
 - **Open decision (TD-017):** PyMuPDF is AGPL-3.0 or commercial. It must be settled before the collaborator is invited: keep PyMuPDF with an AGPL-3.0 repository (current lean), or switch to a permissive PDF library. This is not legal advice.
-- Windows 11 Smart App Control blocked `pip.exe` ("An Application Control policy has blocked this file"). Workaround: run tools as `python -m ...` (TD-015). The compiled packages (pydantic-core, watchfiles, httptools, PyMuPDF, ChromaDB) loaded fine. Do not disable Windows security.
+- Windows 11 Smart App Control blocked `pip.exe` ("An Application Control policy has blocked this file"). Workaround: run Python tools as `python -m ...` (TD-015). Compiled packages in both ecosystems loaded fine (pydantic-core, watchfiles, httptools, PyMuPDF, ChromaDB, Vite, Tailwind, Oxlint). Do not disable Windows security.
 - The "new pip release available" notice is ignored for now (pip is 25.0.1).
+- VS Code showed one "Error refreshing packages" notice from its Python Environments extension on 2026-11-23. It did not affect the project and was not investigated.
 - Open risks: free-tier API quotas, scanned PDFs without text, ChromaDB's size and memory on a small backend host (check in P11.2, TD-014). The ChromaDB install risk on Windows is retired.
 - Deployment constraints (TD-014): Vercel Hobby does not support collaboration on private repositories; free backend hosting is weak for a persistent-disk, always-on service. Both are Phase 11 decisions.
 - Deferred decisions: embedding provider (Phase 5), LLM provider (Phase 6), PDF viewer (Phase 6), PyMuPDF licence (before the collaborator joins), backend host and Vercel plan (Phase 11), cross-origin auth method (Phase 9). See TD-012.
@@ -120,6 +145,5 @@ Windows 11 laptop (an earlier version of this file said Windows 10, which was wr
 - Complete code for every created or changed file, with exact file paths.
 
 ## Exact next steps
-1. Finish P1.5: commit and push the documentation update on `sujal/p1-5-dependency-spike`, open the pull request, merge it with "Create a merge commit", delete the branch, update local `main`.
-2. P1.6: frontend scaffold (Vite, React, TypeScript, Tailwind, Lucide) on branch `sujal/p1-6-frontend-scaffold`.
-3. P1.7: connect the frontend to the backend through `VITE_API_BASE_URL`, backend allowed origins from configuration, `SETUP_GUIDE.md`, make the PyMuPDF licence decision (TD-017), invite the collaborator, tag `phase-1-complete`.
+1. Finish P1.6: commit and push the documentation update on `sujal/p1-6-frontend-scaffold`, open the pull request, merge it with "Create a merge commit", delete the branch, update local `main`.
+2. P1.7, on branch `sujal/p1-7-connect-and-setup-guide`: the frontend reads `VITE_API_BASE_URL` (with a committed `.env.example`) and calls the backend's `GET /health`; the backend reads its allowed origins from configuration (development: http://localhost:5173) so the browser may call it; run both servers side by side and check the result in the browser; rehearse a clean install of both sides (`npm ci` and the Python rebuild); write `SETUP_GUIDE.md` from the confirmed steps; make the PyMuPDF licence decision (TD-017); invite the collaborator; tag `phase-1-complete`.
