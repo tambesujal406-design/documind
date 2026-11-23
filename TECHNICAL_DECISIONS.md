@@ -1,6 +1,6 @@
 # DocuMind: Technical Decisions
 
-Last updated: 2026-11-22 (P1.5 results recorded)
+Last updated: 2026-11-23 (P1.6 results recorded)
 
 Status legend: **Accepted** = approved by the owner. **Provisional** = sensible default, to be tuned or verified. **Deferred** = decided later, after live checks.
 
@@ -11,12 +11,13 @@ Status legend: **Accepted** = approved by the owner. **Provisional** = sensible 
 - 2026-11-21: Collaboration and deployment plans recorded as TD-013 (two-person Git workflow) and TD-014 (deployment constraints and guardrails). The approved architecture is unchanged. TD-010 gains one rule: once a collaborator joins, nothing goes straight to `main`.
 - 2026-11-21: P1.4 findings recorded as TD-015 (Windows development conventions: run Python tools as `python -m`, `httpx2` as the test client). TD-013 gains the merge-method rule.
 - 2026-11-22: P1.5 findings recorded as TD-016 (ChromaDB kept, PyMuPDF 1.28.2 pinned, dependency check script) and TD-017 (PyMuPDF licence, decision open). TD-012 updated. TD-001, TD-014 and TD-015 gain one note each.
+- 2026-11-23: P1.6 findings recorded as TD-018 (frontend toolchain: exact versions, Tailwind 4 as a Vite plugin, Oxlint instead of ESLint, ports). TD-001 gains one note.
 
 ---
 
 ## TD-001 Technology stack (Accepted)
 
-- **Frontend:** React, TypeScript, Vite, Tailwind CSS, Lucide Icons, React Router, TanStack Query, react-pdf (PDF preview and jump to page; confirm in Phase 6).
+- **Frontend:** React, TypeScript, Vite, Tailwind CSS, Lucide Icons, React Router, TanStack Query, react-pdf (PDF preview and jump to page; confirm in Phase 6). Vite, React, TypeScript, Tailwind and Lucide are installed and locked in `frontend/package-lock.json` (P1.6, TD-018). React Router, TanStack Query and react-pdf are added when a screen needs them.
 - **Backend:** Python 3.12, FastAPI, Uvicorn, Pydantic, SQLAlchemy 2.x, pytest. Alembic migrations are added in Phase 9, when the schema has settled.
 - **Document processing:** PyMuPDF 1.28.2 (text per page, page metadata, PDF outline). Its licence is AGPL-3.0 or commercial, see TD-017.
 - **Storage:** SQLite in WAL mode now, PostgreSQL later through SQLAlchemy. ChromaDB 1.5.9 (embedded) for vectors, confirmed in P1.5 (TD-016).
@@ -243,3 +244,18 @@ Current lean: A. Not final.
 Guardrails that hold either way:
 - PDF extraction is built behind an interface in Phase 4 (P4.3), with no PyMuPDF import outside it, so switching later is one adapter.
 - Decide before the collaborator is invited (P1.7), because the licence changes what contributors are agreeing to, and before the repository is made public (P11.1). Add a matching `LICENSE` file when decided.
+
+## TD-018 Frontend toolchain confirmed (Accepted)
+
+Found while building P1.6 on the owner's laptop (Windows 11 Home, Node 24.22.3, npm 11.19.1), 2026-11-22 and 2026-11-23.
+
+- **Generated with** `npm create vite@latest frontend -- --template react-ts --no-interactive` (create-vite 9.3.4), after checking Vite's official guide (Node 20.19+ or 22.12+ required).
+- **Exact versions** are locked in `frontend/package-lock.json`. `package.json` uses ranges such as `^`, so the lock file is what makes installs identical, and it is committed: Vite 8.3.8, React and React DOM 19.3.1, TypeScript 7.0.2, Tailwind CSS 4.3.5 with `@tailwindcss/vite` 4.3.5, lucide-react 1.78.0, `@vitejs/plugin-react` 6.3.0 and Oxlint 1.94.0. Installing and building reported 0 vulnerabilities.
+- **Tailwind 4 is a Vite plugin.** `vite.config.ts` lists `tailwindcss()` next to `react()`, and `src/index.css` is the single line `@import "tailwindcss";`. There is no `tailwind.config` file and no PostCSS setup. Colours, fonts, spacing and dark mode become design tokens in CSS in Phase 2 (P2.1). The colours on the placeholder page are not part of the design.
+- **Oxlint instead of ESLint.** The current Vite template ships Oxlint (`npm run lint`, configured in `.oxlintrc.json`). We keep it: it is the template default, it adds no extra dependency, and it reported 0 warnings and 0 errors. The ESLint editor extension is not used for the frontend.
+- **Icons:** `lucide-react` with named imports only (`import { FileText } from 'lucide-react'`), so unused icons are not bundled. Decorative icons get `aria-hidden="true"`.
+- **Scripts and ports:** `npm run dev` (port 5173), `npm run build` (`tsc -b && vite build`, output in `dist/`, ignored by Git), `npm run lint`, and `npm run preview` (serves `dist/` on port 4173). The backend uses port 8000. The browser treats these as different origins, so the backend must allow the frontend's origin (CORS), which P1.7 sets up from configuration.
+- **Windows:** Vite 8, Tailwind 4.3 and Oxlint all ran with Smart App Control active and nothing was blocked. TD-015's rule about running tools as modules is specific to Python.
+- **Not added yet:** React Router, TanStack Query and react-pdf wait until a screen needs them (Phases 2 and 6).
+- **Starter files removed:** the demo page, `App.css`, the logos, `icons.svg` and the starter README. A DocuMind favicon (`public/favicon.svg`) and the page title `DocuMind` replace them. The template's own `frontend/.gitignore` is kept next to the root one.
+- **Clean install:** a rebuild of `node_modules` from the lock file with `npm ci` is part of the P1.7 rehearsal, the same way the Python environment was rebuilt in P1.5.
