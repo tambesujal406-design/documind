@@ -1,6 +1,6 @@
 # DocuMind: Technical Decisions
 
-Last updated: 2026-11-23 (P1.6 results recorded)
+Last updated: 2026-11-24 (P1.7a results recorded)
 
 Status legend: **Accepted** = approved by the owner. **Provisional** = sensible default, to be tuned or verified. **Deferred** = decided later, after live checks.
 
@@ -12,6 +12,7 @@ Status legend: **Accepted** = approved by the owner. **Provisional** = sensible 
 - 2026-11-21: P1.4 findings recorded as TD-015 (Windows development conventions: run Python tools as `python -m`, `httpx2` as the test client). TD-013 gains the merge-method rule.
 - 2026-11-22: P1.5 findings recorded as TD-016 (ChromaDB kept, PyMuPDF 1.28.2 pinned, dependency check script) and TD-017 (PyMuPDF licence, decision open). TD-012 updated. TD-001, TD-014 and TD-015 gain one note each.
 - 2026-11-23: P1.6 findings recorded as TD-018 (frontend toolchain: exact versions, Tailwind 4 as a Vite plugin, Oxlint instead of ESLint, ports). TD-001 gains one note.
+- 2026-11-24: P1.7a recorded as TD-019 (backend settings, CORS, the frontend's API address and status badge). TD-018 corrected: Windows blocked Oxlint on 2026-11-24, an open issue. TD-015 gains one note. P1.7 is now split into P1.7a and P1.7b, so references to P1.7 in TD-012, TD-014, TD-017 and TD-018 are updated.
 
 ---
 
@@ -169,7 +170,7 @@ Location: `backend/evals/` with `datasets/` (JSONL cases), `fixtures/` (small se
 | LLM provider | Phase 6 | Check live free-tier limits, then choose |
 | react-pdf vs simpler PDF viewer | Phase 6 | Try react-pdf first |
 | ChromaDB vs SQLite plus NumPy fallback | Phase 1 (P1.5) | **Resolved 2026-11-22: ChromaDB 1.5.9 kept** (TD-016). The fallback stays possible behind `VectorStore` |
-| PyMuPDF licence: keep it with an AGPL-3.0 repository, or switch to a permissive PDF library | Before the collaborator is invited (P1.7) | See TD-017 |
+| PyMuPDF licence: keep it with an AGPL-3.0 repository, or switch to a permissive PDF library | Before the collaborator is invited (P1.7b) | See TD-017 |
 | Chunk size, overlap, top-k | Phases 5 and 6 | Tune against evals |
 | Upload limit values | Phase 4 | Adjust after testing real PDFs |
 | Cross-origin auth method (tokens vs cookies) | Phase 9 | Decide with separate frontend and backend domains in mind (TD-014) |
@@ -207,7 +208,7 @@ Plan: GitHub holds the source. Vercel hosts the React + Vite frontend (the `fron
 2. Per-user daily limits on uploads, questions and re-indexing, tighter upload sizes for the demo, a quota cap, and friendly handling of provider rate-limit errors.
 3. A visible notice that uploaded text is sent to third-party AI providers, with working document deletion (TD-006).
 4. Secrets only as host environment variables. The frontend receives only `VITE_API_BASE_URL`, which is public by design. Never put keys in `VITE_` variables. Backend CORS allows only the Vercel domain(s). HTTPS only.
-5. The frontend never hardcodes `localhost`: the API address comes from `VITE_API_BASE_URL` starting in P1.7.
+5. The frontend never hardcodes `localhost`: the API address comes from `VITE_API_BASE_URL` (done in P1.7a, TD-019).
 6. Frontend and backend run on different domains, so the token-versus-cookie decision (SameSite, CORS credentials) is made in Phase 9 with that in mind.
 7. Deployment files and a `DEPLOYMENT.md` are written in Phase 11, with separate development and production configuration.
 
@@ -219,6 +220,7 @@ Found while building P1.4 on Windows 11 Home with Smart App Control active (2026
 - **Test client:** `httpx2` (2.16.2) is pinned in `requirements-dev.txt`, not `httpx`. Starlette's `TestClient` now tries `httpx2` first and warns that using `httpx` is deprecated. `httpx2` is a fork of httpx 0.28.1 with the same public API and needs Python 3.11 or newer. Since P1.5, ChromaDB's dependencies install `httpx` 0.28.1 again next to `httpx2`. Starlette still prefers `httpx2`, and pytest showed no warning in a freshly rebuilt environment (2026-11-22).
 - **Virtual environment:** `backend/.venv`, created with `py -3.12` (Python 3.12.10) because the machine's default `python` is 3.15. Activation with `.\.venv\Scripts\Activate.ps1` worked without changing PowerShell's script policy.
 - **Pinning:** `requirements.txt` pins only the packages we use directly. Their dependencies float within compatible ranges.
+- **Native files in Node tools can be blocked too (2026-11-24):** Oxlint's compiled file was blocked by the same Smart App Control. See TD-018. The same rule holds: do not turn off Windows security.
 
 ## TD-016 Vector store and PDF library confirmed (Accepted)
 
@@ -243,7 +245,7 @@ Current lean: A. Not final.
 
 Guardrails that hold either way:
 - PDF extraction is built behind an interface in Phase 4 (P4.3), with no PyMuPDF import outside it, so switching later is one adapter.
-- Decide before the collaborator is invited (P1.7), because the licence changes what contributors are agreeing to, and before the repository is made public (P11.1). Add a matching `LICENSE` file when decided.
+- Decide before the collaborator is invited (P1.7b), because the licence changes what contributors are agreeing to, and before the repository is made public (P11.1). Add a matching `LICENSE` file when decided.
 
 ## TD-018 Frontend toolchain confirmed (Accepted)
 
@@ -252,10 +254,25 @@ Found while building P1.6 on the owner's laptop (Windows 11 Home, Node 24.22.3, 
 - **Generated with** `npm create vite@latest frontend -- --template react-ts --no-interactive` (create-vite 9.3.4), after checking Vite's official guide (Node 20.19+ or 22.12+ required).
 - **Exact versions** are locked in `frontend/package-lock.json`. `package.json` uses ranges such as `^`, so the lock file is what makes installs identical, and it is committed: Vite 8.3.8, React and React DOM 19.3.1, TypeScript 7.0.2, Tailwind CSS 4.3.5 with `@tailwindcss/vite` 4.3.5, lucide-react 1.78.0, `@vitejs/plugin-react` 6.3.0 and Oxlint 1.94.0. Installing and building reported 0 vulnerabilities.
 - **Tailwind 4 is a Vite plugin.** `vite.config.ts` lists `tailwindcss()` next to `react()`, and `src/index.css` is the single line `@import "tailwindcss";`. There is no `tailwind.config` file and no PostCSS setup. Colours, fonts, spacing and dark mode become design tokens in CSS in Phase 2 (P2.1). The colours on the placeholder page are not part of the design.
-- **Oxlint instead of ESLint.** The current Vite template ships Oxlint (`npm run lint`, configured in `.oxlintrc.json`). We keep it: it is the template default, it adds no extra dependency, and it reported 0 warnings and 0 errors. The ESLint editor extension is not used for the frontend.
+- **Oxlint instead of ESLint.** The current Vite template ships Oxlint (`npm run lint`, configured in `.oxlintrc.json`). We keep it: it is the template default, it adds no extra dependency, and it reported 0 warnings and 0 errors on 2026-11-23 (Windows blocked it on 2026-11-24, see the Windows bullet below). The ESLint editor extension is not used for the frontend.
 - **Icons:** `lucide-react` with named imports only (`import { FileText } from 'lucide-react'`), so unused icons are not bundled. Decorative icons get `aria-hidden="true"`.
-- **Scripts and ports:** `npm run dev` (port 5173), `npm run build` (`tsc -b && vite build`, output in `dist/`, ignored by Git), `npm run lint`, and `npm run preview` (serves `dist/` on port 4173). The backend uses port 8000. The browser treats these as different origins, so the backend must allow the frontend's origin (CORS), which P1.7 sets up from configuration.
-- **Windows:** Vite 8, Tailwind 4.3 and Oxlint all ran with Smart App Control active and nothing was blocked. TD-015's rule about running tools as modules is specific to Python.
+- **Scripts and ports:** `npm run dev` (port 5173), `npm run build` (`tsc -b && vite build`, output in `dist/`, ignored by Git), `npm run lint`, and `npm run preview` (serves `dist/` on port 4173). The backend uses port 8000. The browser treats these as different origins, so the backend must allow the frontend's origin (CORS), which P1.7a set up from configuration (TD-019).
+- **Windows:** on 2026-11-23 Vite 8, Tailwind 4.3 and Oxlint all ran with Smart App Control active and nothing was blocked. **That changed on 2026-11-24 (open issue):** `npm run lint` failed twice with "An Application Control policy has blocked this file", naming `node_modules\@oxlint\binding-win32-x64-msvc\oxlint.win32-x64-msvc.node`. The same lint run had passed the day before, and the cause is not known. `npm run build` (which includes the TypeScript check), the dev server and Tailwind were not affected. Smart App Control stays on, because turning it off cannot be undone without resetting Windows. Options, to be decided in P1.7b: look for the block in Windows Security (Protection history), retry after a restart, or move the frontend checker to ESLint (plain JavaScript with no native file, at the cost of more packages). **Provisional rule until then:** the TypeScript check inside `npm run build` is the frontend's gate. TD-015's rule about running tools as modules is specific to Python.
 - **Not added yet:** React Router, TanStack Query and react-pdf wait until a screen needs them (Phases 2 and 6).
 - **Starter files removed:** the demo page, `App.css`, the logos, `icons.svg` and the starter README. A DocuMind favicon (`public/favicon.svg`) and the page title `DocuMind` replace them. The template's own `frontend/.gitignore` is kept next to the root one.
-- **Clean install:** a rebuild of `node_modules` from the lock file with `npm ci` is part of the P1.7 rehearsal, the same way the Python environment was rebuilt in P1.5.
+- **Clean install:** a rebuild of `node_modules` from the lock file with `npm ci` is part of the P1.7b rehearsal, the same way the Python environment was rebuilt in P1.5.
+
+## TD-019 Backend settings, CORS and the frontend's API address (Accepted)
+
+Built in P1.7a on the owner's laptop, 2026-11-23 and 2026-11-24. It carries out TD-014 guardrails 4 and 5 for local development.
+
+- **Why CORS exists.** The page at `http://localhost:5173` and the API at `http://127.0.0.1:8000` are different origins, and a browser refuses to hand the API's answer to a page from another origin unless the API says that origin is allowed. This is the browser's rule, and curl or pytest would never show the problem.
+- **Backend settings live in one place:** `backend/app/config.py`, a `Settings` class (pydantic-settings 2.16.3) read through a cached `get_settings()`. Values come from environment variables, or from a `.env` file in the folder the server is started from (always `backend/`). Everything has a development default, so the API runs with no `.env`. `backend/.env.example` is committed. A real `.env` is for secrets later (provider keys, Phases 5 and 6) and must stay out of Git. Only `frontend/.env.local` has been confirmed as ignored so far, so `backend/.env` is checked in P1.7b.
+- **`CORS_ALLOWED_ORIGINS`** is a comma-separated list. The default is `http://localhost:5173,http://127.0.0.1:5173`. Spaces and blank entries are ignored. An allowed origin gets the CORS headers back. Any other origin gets none, so the browser blocks it, and a preflight request from another origin is answered with 400. In production the list is set to the Vercel domain only (TD-014).
+- **Left open for Phase 9:** the middleware allows every method and header (`*`), and credentials are off. Phase 9 tightens this when the token-versus-cookie decision is made (TD-014, guardrail 6).
+- **Tests:** `backend/tests/test_cors.py` has 6 tests: the allowed origin is echoed back, another origin gets no header, a preflight is accepted for the allowed origin and rejected for another, the list is read from the environment variable, and blank entries are ignored. With the health test, `python -m pytest` gave `7 passed` on the owner's laptop.
+- **The frontend's API address** is `VITE_API_BASE_URL`, set in `frontend/.env.local` (ignored through `*.local`), with `frontend/.env.example` committed as the template. Every `VITE_` variable is public: it is built into the code the browser downloads, so it never holds a secret. Vite reads it only when the dev server starts. `src/vite-env.d.ts` gives it a type.
+- **One file talks to the backend:** `frontend/src/api.ts` trims the address and any trailing slash and offers `getHealth(signal)`. If the address is not set it throws `ApiNotConfiguredError` without making any network call. Later API functions go beside it.
+- **The home page shows four states** as a badge: checking (amber, pulsing), connected (green, with the service name from `/health`), address not set (red, with a hint) and not reachable (red, with a hint). The check runs once when the page opens, through an `AbortController`, and a result that arrives after the request was cancelled is ignored. In development React runs the effect twice on purpose (StrictMode), so the backend may log two `GET /health` lines. The production build asks once.
+- **Verified on 2026-11-24:** `npm run build` passed with real React types, and the owner watched the badge go green with both servers running, red with the backend stopped, and green again after the restart. A green badge also proves that the browser accepted the CORS headers.
+- **Not verified:** the "address not set" badge was not seen in a browser (only the `api.ts` logic behind it, under Node). The frontend has no automated tests yet. Lint could not run (TD-018).
