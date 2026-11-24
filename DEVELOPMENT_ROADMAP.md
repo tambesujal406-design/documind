@@ -1,6 +1,6 @@
 # DocuMind: Development Roadmap
 
-Last updated: 2026-11-23
+Last updated: 2026-11-24
 
 ## How to read this
 
@@ -33,7 +33,7 @@ Delivered: architecture, RAG pipeline design, folder structure, risk list, workf
 
 Rule for this phase: one installation or configuration step at a time, each command explained, wait for the owner's confirmation. No software is assumed installed until the owner confirms.
 
-**Progress (2026-11-23):** P1.1 to P1.6 done. P1.7 not started.
+**Progress (2026-11-24):** P1.1 to P1.7a done (P1.7a waits for its pull request). P1.7b not started. P1.7 was split in two to keep each milestone small (TD-011).
 
 | ID | Milestone | Outcome |
 |---|---|---|
@@ -43,7 +43,8 @@ Rule for this phase: one installation or configuration step at a time, each comm
 | P1.4 | Backend scaffold | Python 3.12 virtual environment, FastAPI `/health` endpoint, first pytest passing |
 | P1.5 | Dependency spike | PyMuPDF and ChromaDB install, import and a real functional check on the owner's machine (retires the Windows install risk). Done: ChromaDB kept, PyMuPDF 1.28.2 pinned (TD-016) |
 | P1.6 | Frontend scaffold | Vite, React, TypeScript, Tailwind and Lucide running in the browser. Done: placeholder page, lint and production build checked (TD-018) |
-| P1.7 | Connect and close the phase | Frontend calls backend `/health` using an API address from the `VITE_API_BASE_URL` environment variable (never hardcoded, TD-014), backend allowed origins read from configuration, a clean install of both sides rehearsed (`npm ci` and the Python rebuild), `SETUP_GUIDE.md` written from the confirmed steps, PyMuPDF licence decision made (TD-017), collaborator invited (TD-013), `PROJECT_STATE.md` updated, tag `phase-1-complete` |
+| P1.7a | Connect frontend and backend | Frontend calls backend `/health` using an API address from the `VITE_API_BASE_URL` environment variable (never hardcoded, TD-014), backend allowed origins read from configuration (CORS), 7 backend tests pass, the status badge checked in the browser (TD-019). Done |
+| P1.7b | Close Phase 1 | A clean install of both sides rehearsed (`npm ci` and the Python rebuild), `SETUP_GUIDE.md` written from the confirmed steps, a decision on the lint tool that Windows blocked (TD-018), PyMuPDF licence decision made with a matching `LICENSE` file (TD-017), collaborator invited (TD-013), `PROJECT_STATE.md` updated, tag `phase-1-complete` |
 
 Exit criteria: both servers run on the owner's laptop, the repository is on GitHub, setup is documented, the ChromaDB decision is made (done, TD-016), and the PyMuPDF licence decision is made (TD-017).
 
