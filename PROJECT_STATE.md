@@ -1,6 +1,6 @@
 # DocuMind: PROJECT STATE
 
-Last updated: 2026-11-24
+Last updated: 2026-11-26
 
 **How to use this file:** paste it at the start of any new Claude conversation, together with any files being changed. A new conversation must not be assumed to know anything about the project. Once the repository has a collaborator, this file is shared: update it only in the pull request that completes a milestone (TD-013).
 
@@ -8,9 +8,9 @@ Last updated: 2026-11-24
 Phase 1: Project initialization and environment setup. Phase 0 is complete and approved.
 
 ## Current task
-**P1.7a Connect frontend and backend is finished on branch `sujal/p1-7a-connect-frontend-backend` (commit `48c5bf3` for the backend, `c6c0634` for the frontend) and is waiting for its pull request to be merged.** This file describes the state as of that merge. Remaining owner steps: commit and push the documentation update, open the pull request (#4), merge it with "Create a merge commit", delete the branch, update local `main`.
-After that the next task is **P1.7b Close Phase 1**, on a new branch `sujal/p1-7b-close-phase-1`: clean-install rehearsal of both sides, `SETUP_GUIDE.md`, a decision about the blocked lint tool, the PyMuPDF licence decision (TD-017) with a matching `LICENSE` file, invite the collaborator, tag `phase-1-complete`.
-P1.6 was merged earlier by pull request #3 (merge commit `9616ff7`).
+**P1.7b Close Phase 1 is finished on branch `sujal/p1-7b-close-phase-1` and is waiting for its pull request to be merged.** This file describes the state as of that merge. Remaining owner steps: commit and push the documentation update, open the pull request (#5), merge it with "Create a merge commit", delete the branch, update local `main`. Then, on `main`: invite the friend as a collaborator with the Write role and check whether rulesets or branch protection are available on the private repository (TD-013), and create the tag `phase-1-complete`. Record the invitation date and the tag in the next documentation update (P2.1).
+After that the next task is **Phase 2, P2.1: design tokens, light and dark theme, layout shell**, on a new branch `sujal/p2-1-design-tokens-and-layout`.
+P1.7a was merged earlier by pull request #4 (merge commit `14b703b`).
 
 ## Milestone progress (Phase 1)
 | ID | Milestone | Status |
@@ -21,8 +21,8 @@ P1.6 was merged earlier by pull request #3 (merge commit `9616ff7`).
 | P1.4 | Backend scaffold | Done |
 | P1.5 | Dependency spike (PyMuPDF, ChromaDB) | Done |
 | P1.6 | Frontend scaffold | Done |
-| P1.7a | Connect frontend and backend (settings, CORS, status badge) | Done (pending merge) |
-| P1.7b | Close Phase 1: clean-install rehearsal, setup guide, lint decision, licence decision, invite collaborator, tag | Not started |
+| P1.7a | Connect frontend and backend (settings, CORS, status badge) | Done |
+| P1.7b | Close Phase 1: clean-install rehearsal, setup guide, lint plan, licence decision, README | Done (pending merge). Invite collaborator and tag follow the merge |
 
 ## Completed
 - Phase 0: architecture, RAG pipeline design, folder structure, risk list, workflow and roadmap approved. Seven refinements added (`TECHNICAL_DECISIONS.md`, TD-004 to TD-011).
@@ -32,7 +32,8 @@ P1.6 was merged earlier by pull request #3 (merge commit `9616ff7`).
 - P1.4: `backend/` folder, Python 3.12 virtual environment, FastAPI app with `GET /health`, first pytest passing, server run and `/health` and `/docs` checked in the browser by the owner. Merged by pull request #1 (feature commit `c41ed55`, merge commit `e6f6787`).
 - P1.5: PyMuPDF 1.28.2 and ChromaDB 1.5.9 installed, pinned and proven by `backend/scripts/check_dependencies.py`. ChromaDB is kept (TD-016). The PyMuPDF licence question is recorded as an open decision (TD-017). The virtual environment was deleted and rebuilt from `requirements-dev.txt` alone, and every check passed. Merged by pull request #2 (feature commit `d3da4e9`, docs commit `340a6a9`, merge commit `8320643`).
 - P1.6: `frontend/` app generated with create-vite 9.3.4 (React and TypeScript), Tailwind CSS 4.3.5 added as a Vite plugin, lucide-react 1.78.0 added, starter demo files removed, own favicon and page title added. A placeholder page proves all of it. Lint, production build and a preview of the built app all checked by the owner. Merged by pull request #3 (feature commit `7886dda`, docs commit `b5fa6a9`, merge commit `9616ff7`) (TD-018).
-- P1.7a: the backend reads its settings from `backend/app/config.py` and allows the frontend's origin through CORS, with 6 new tests (7 passed in total). The frontend reads the API address from `VITE_API_BASE_URL`, calls `GET /health` and shows the result as a status badge on the home page. The owner saw the badge go green with both servers running, red with the backend stopped, and green again after restarting it (TD-019). Commits `48c5bf3` (backend) and `c6c0634` (frontend) on branch `sujal/p1-7a-connect-frontend-backend`. Windows blocked `npm run lint` during this milestone (see Known issues).
+- P1.7a: the backend reads its settings from `backend/app/config.py` and allows the frontend's origin through CORS, with 6 new tests (7 passed in total). The frontend reads the API address from `VITE_API_BASE_URL`, calls `GET /health` and shows the result as a status badge on the home page. The owner saw the badge go green with both servers running, red with the backend stopped, and green again after restarting it (TD-019). Merged by pull request #4 (commits `48c5bf3` backend, `c6c0634` frontend, `2b44274` docs; merge commit `14b703b`). Windows blocked `npm run lint` during this milestone (see Known issues).
+- P1.7b: the clean-install rehearsal passed on both sides (frontend: `node_modules` deleted, `npm ci`, build output identical to the previous build; backend: `.venv` deleted and rebuilt from `requirements-dev.txt`, 7 tests passed, both dependency checks passed). `SETUP_GUIDE.md` was written from the confirmed steps (commit `7d798ef`). Licence decided: keep PyMuPDF and release DocuMind under AGPL-3.0 (TD-017, now Accepted). The `LICENSE` file holds the AGPL-3.0 text: commit `9305ef8` held the plain GPL-3.0 text by mistake and commit `3d62e66` replaced it, after a check of the title line and section 13 caught the error. `README.md` was rewritten (commit `8e161f6`). `backend/.env` and `frontend/.env.local` are both confirmed ignored by Git. A provisional plan for the blocked lint tool is recorded in TD-018.
 - Product features: none yet. The backend exposes only `GET /health`. The frontend shows a placeholder page.
 
 ## Files created or modified
@@ -48,6 +49,10 @@ Added by P1.7a (branch `sujal/p1-7a-connect-frontend-backend`):
 - Frontend (commit `c6c0634`): `frontend/.env.example`, `frontend/src/api.ts` (the only code that calls the backend), `frontend/src/vite-env.d.ts` (types for the environment variable). Changed: `frontend/src/App.tsx`, now showing the backend status badge.
 - Updated in the P1.7a documentation commit: `PROJECT_STATE.md`, `TASKS.md`, `DEVELOPMENT_ROADMAP.md`, `TECHNICAL_DECISIONS.md` (new TD-019).
 
+Added by P1.7b (branch `sujal/p1-7b-close-phase-1`), all in the repository root:
+- `SETUP_GUIDE.md` (new, Windows setup), `LICENSE` (new, AGPL-3.0 text), `README.md` (rewritten: status, stack, setup pointer, document index, licence).
+- Updated in the P1.7b documentation commit: `PROJECT_STATE.md`, `TASKS.md`, `DEVELOPMENT_ROADMAP.md`, `TECHNICAL_DECISIONS.md` (TD-017 Accepted, TD-018 lint plan).
+
 Local only, never committed: `backend/.venv/`, `frontend/node_modules/`, `frontend/dist/`, `frontend/.env.local` (all gitignored; the last one was confirmed with `git check-ignore`).
 
 ## Architecture (summary, unchanged)
@@ -60,7 +65,7 @@ Local only, never committed: `backend/.venv/`, `frontend/node_modules/`, `fronte
 Details: `TECHNICAL_DECISIONS.md`.
 
 ## Collaboration and deployment plan (recorded 2026-11-21, details in TD-013 and TD-014)
-- The owner (GitHub user `tambesujal406-design`) owns the private repository `documind`. A friend will be added as a collaborator at the end of Phase 1, once `SETUP_GUIDE.md` exists and the PyMuPDF licence decision (TD-017) is made. Not added yet.
+- The owner (GitHub user `tambesujal406-design`) owns the private repository `documind`. A friend will be added as a collaborator at the end of Phase 1, once `SETUP_GUIDE.md` exists and the PyMuPDF licence decision (TD-017) is made. Both are now done. The friend is invited right after pull request #5 is merged, so that `main` already holds the setup guide, the licence and the new README. Not added yet.
 - Both contribute through branches and pull requests, with meaningful commits.
 - Deployment target: GitHub for source, Vercel for the React + Vite frontend, a separate host for the FastAPI backend, worker and persistent data. Goal: one live URL shared in both LinkedIn posts.
 - **Nothing is deployed before Phase 11.** No public URL before Phase 9 authentication exists.
@@ -82,7 +87,7 @@ Backend packages in `backend/.venv`, pinned in `backend/requirements.txt` and `b
 | fastapi | 0.165.0 | Web framework |
 | uvicorn[standard] | 0.54.0 | Server |
 | pydantic-settings | 2.16.3 | Reads settings from environment variables and a `.env` file (TD-019) |
-| pymupdf | 1.28.2 | PDF text, pages and outline (licence: TD-017) |
+| pymupdf | 1.28.2 | PDF text, pages and outline (AGPL-3.0 or commercial; DocuMind uses it under AGPL-3.0, TD-017) |
 | chromadb | 1.5.9 | Embedded vector database (TD-016) |
 | pytest | 9.2.0 | Test runner (dev) |
 | httpx2 | 2.16.2 | Used by Starlette's `TestClient` (dev, see TD-015) |
@@ -116,6 +121,7 @@ Backend: run in PowerShell from `C:\dev\documind\backend`.
 
 Frontend: run in PowerShell from `C:\dev\documind\frontend`. The Python environment does not need to be active.
 - Install packages (first time, or after `package.json` changes): `npm install`
+- Install exactly what the lock file says (new machine or clean rebuild): `npm ci`. Proven on 2026-11-25: `Remove-Item -Recurse -Force node_modules`, then `npm ci`, then `npm run build` gave an identical build.
 - First time only (TD-019): `Copy-Item .env.example .env.local`. This holds `VITE_API_BASE_URL=http://127.0.0.1:8000`. Vite reads it when it starts, so restart `npm run dev` after any change. `.env.local` is gitignored.
 - Run the app (port 5173): `npm run dev`, then open http://localhost:5173/. Stop it with `Ctrl+C`.
 - Run both together: backend in one PowerShell tab (`Ctrl+Shift+T` opens another), frontend in the other. The page badge should read "Backend connected (documind-api)". With the backend stopped it reads "Backend not reachable".
@@ -134,19 +140,23 @@ Frontend: run in PowerShell from `C:\dev\documind\frontend`. The Python environm
 - 2026-11-23: `python -m pytest` gave `7 passed` on the owner's laptop: the health test plus 6 CORS tests (`tests/test_cors.py`).
 - 2026-11-24: frontend `npm run build` passed with the new code (2133 modules transformed; JavaScript 225.38 kB, 71.09 kB gzipped; CSS 10.17 kB). `git check-ignore -v .env.local` showed it is ignored (`frontend/.gitignore` line 13, `*.local`). With both servers running, the owner saw the badge read "Backend connected (documind-api)". With the backend stopped it read "Backend not reachable" with the start hint, and after restarting the backend it was green again. Before that, the logic of `api.ts` was tested under Node with a fake `fetch`: address unset gives `ApiNotConfiguredError` with no network call, a trailing slash is trimmed, and an error status throws.
 - 2026-11-24: `npm run lint` failed twice because Windows blocked Oxlint's native file (see Known issues).
-- Not tested: the dependency checks ran only on the owner's laptop (Windows, Python 3.12.10, Node 24.22.3). The collaborator's machine and the future backend host are untested. A clean frontend install from the lock file (`npm ci`) has not been run yet; it is planned for P1.7b. The frontend has no automated tests yet. The "Backend address not set" badge was not seen in a browser; only the `api.ts` logic behind it was tested (under Node).
+- 2026-11-24: `git check-ignore -v` confirmed that `backend/.env` is ignored (root `.gitignore` line 3, rule `.env`) and that `frontend/.env.local` is ignored.
+- 2026-11-25: frontend clean rebuild: `node_modules` deleted, `npm ci`, then `npm run build` passed with identical output (2133 modules; `index-CnFYzOV-.css` 10.17 kB and `index-BkS5E6j9.js` 225.38 kB). `git status` stayed clean, so `package-lock.json` was not changed. `npm run lint` was blocked a third time, even after the reinstall, and Windows Security showed a notice that it could not confirm who published `oxlint.win32-x64-msvc.node`.
+- 2026-11-25: backend clean rebuild: `.venv` deleted and recreated with `py -3.12`, installed from `requirements-dev.txt` alone. `python -m pytest` gave `7 passed`, and `check_dependencies.py` gave `PASS PyMuPDF`, `PASS ChromaDB` and `All checks passed`.
+- 2026-11-26: the `LICENSE` file's title line (`GNU AFFERO GENERAL PUBLIC LICENSE`, `Version 3, 19 November 2007`), its line count (661) and its section 13 ("Remote Network Interaction", line 540) were checked.
+- Not tested: the dependency checks ran only on the owner's laptop (Windows, Python 3.12.10, Node 24.22.3). The collaborator's machine and the future backend host are untested. A fresh `git clone` followed by `SETUP_GUIDE.md` on a second computer has not been done yet; the collaborator's first setup is that test. The frontend has no automated tests yet. The "Backend address not set" badge was not seen in a browser; only the `api.ts` logic behind it was tested (under Node).
 
 ## Known bugs and unresolved issues
 - No known bugs.
-- **Open decision (TD-017):** PyMuPDF is AGPL-3.0 or commercial. It must be settled before the collaborator is invited: keep PyMuPDF with an AGPL-3.0 repository (current lean), or switch to a permissive PDF library. This is not legal advice.
+- **Decided (TD-017, 2026-11-26):** PyMuPDF is AGPL-3.0 or commercial. DocuMind keeps PyMuPDF and is released under AGPL-3.0, with a `LICENSE` file. PDF extraction is still built behind an interface in Phase 4, so switching later stays possible. This is not legal advice.
 - Windows 11 Smart App Control blocked `pip.exe` ("An Application Control policy has blocked this file"). Workaround: run Python tools as `python -m ...` (TD-015). Compiled packages loaded fine (pydantic-core, watchfiles, httptools, PyMuPDF, ChromaDB, Vite, Tailwind). Oxlint is the exception since 2026-11-24 (next item). Do not disable Windows security.
-- **Oxlint blocked (open, new on 2026-11-24).** `npm run lint` failed twice with "An Application Control policy has blocked this file", naming `node_modules\@oxlint\binding-win32-x64-msvc\oxlint.win32-x64-msvc.node`. The same lint run passed with 0 warnings on 2026-11-23, and why it changed is unknown. Nothing else is affected: `npm run build` (which includes the TypeScript check), the dev server and Tailwind all work. Smart App Control stays on, because turning it off cannot be undone without resetting Windows. Options for P1.7b: look for the block in Windows Security (Protection history), retry after a restart, or move the frontend checker to ESLint (plain JavaScript, but more packages). Until decided, the TypeScript check in `npm run build` is the frontend's gate (TD-018).
-- Not yet checked: that a real `backend/.env` file would be ignored by Git. Only `frontend/.env.local` has been checked. Check it in P1.7b before the collaborator is invited, with `git check-ignore -v backend/.env`.
+- **Oxlint blocked (open, provisional plan, since 2026-11-24).** `npm run lint` failed three times (the third time after a clean `npm ci` on 2026-11-25) with "An Application Control policy has blocked this file", naming `node_modules\@oxlint\binding-win32-x64-msvc\oxlint.win32-x64-msvc.node`. The same lint run passed with 0 warnings on 2026-11-23, and why it changed is unknown. Nothing else is affected: `npm run build` (which includes the TypeScript check), the dev server and Tailwind all work. Smart App Control stays on, because turning it off cannot be undone without resetting Windows. Windows Security said it could not confirm who published that file (it has no publisher signature). Provisional plan (TD-018): keep Oxlint (the template default, no extra packages), treat the TypeScript check in `npm run build` as the frontend's gate on this laptop, and add a GitHub Actions check that runs lint, build and tests on every pull request, where Windows is not involved. That CI milestone is proposed and waits for the owner's confirmation (`TASKS.md`). Switching to ESLint was considered and not chosen, because it adds many packages and its TypeScript 7 support was not checked.
+- `gnu.org` could not be reached from the owner's network on 2026-11-26 (PowerShell: unable to connect; browser: connection timed out), while GitHub worked. The AGPL text was taken from GitHub's licence data instead. Any step that needs `gnu.org` may fail on this network.
 - The "new pip release available" notice is ignored for now (pip is 25.0.1).
 - VS Code showed one "Error refreshing packages" notice from its Python Environments extension on 2026-11-23. It did not affect the project and was not investigated.
 - Open risks: free-tier API quotas, scanned PDFs without text, ChromaDB's size and memory on a small backend host (check in P11.2, TD-014). The ChromaDB install risk on Windows is retired.
 - Deployment constraints (TD-014): Vercel Hobby does not support collaboration on private repositories; free backend hosting is weak for a persistent-disk, always-on service. Both are Phase 11 decisions.
-- Deferred decisions: embedding provider (Phase 5), LLM provider (Phase 6), PDF viewer (Phase 6), PyMuPDF licence (before the collaborator joins), backend host and Vercel plan (Phase 11), cross-origin auth method (Phase 9). See TD-012.
+- Deferred decisions: embedding provider (Phase 5), LLM provider (Phase 6), PDF viewer (Phase 6), backend host and Vercel plan (Phase 11), cross-origin auth method (Phase 9). See TD-012.
 
 ## Owner environment
 Windows 11 laptop (an earlier version of this file said Windows 10, which was wrong), 8 GB RAM, Intel Core i3, integrated graphics, 512 GB storage. Free Claude plan with usage limits. Project folder: `C:\dev\documind`. Repository: https://github.com/tambesujal406-design/documind.git (private).
@@ -162,5 +172,7 @@ Windows 11 laptop (an earlier version of this file said Windows 10, which was wr
 - Complete code for every created or changed file, with exact file paths.
 
 ## Exact next steps
-1. Finish P1.7a: commit and push the documentation update on `sujal/p1-7a-connect-frontend-backend`, open pull request #4, merge it with "Create a merge commit", delete the branch, update local `main`.
-2. P1.7b, on branch `sujal/p1-7b-close-phase-1`: check that `backend/.env` is gitignored; rehearse a clean install of both sides (`npm ci`, then the Python rebuild); write `SETUP_GUIDE.md` from the confirmed steps (Windows first); decide what to do about the blocked lint tool (TD-018); make the PyMuPDF licence decision (TD-017) and add the matching `LICENSE` file; update `README.md`; invite the collaborator (Write role) and check whether branch protection or rulesets are available on the private repository (TD-013); tag `phase-1-complete`.
+1. Finish P1.7b: commit and push the documentation update on `sujal/p1-7b-close-phase-1`, open pull request #5, merge with "Create a merge commit", delete the branch, update local `main`.
+2. On `main` after the merge: invite the friend as a collaborator (Write role) and check whether branch protection or rulesets are available on the private repository (TD-013). Create and push the tag `phase-1-complete`. Record both in the P2.1 documentation update.
+3. Decide whether to add the proposed GitHub Actions check (lint, build and tests on every pull request), which also gets around the Oxlint block (TD-018).
+4. Phase 2, starting with P2.1 (design tokens, light and dark theme, layout shell), on a new branch `sujal/p2-1-design-tokens-and-layout`.
