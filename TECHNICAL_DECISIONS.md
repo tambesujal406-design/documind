@@ -1,6 +1,6 @@
 # DocuMind: Technical Decisions
 
-Last updated: 2026-11-24 (P1.7a results recorded)
+Last updated: 2026-11-26 (P1.7b results recorded)
 
 Status legend: **Accepted** = approved by the owner. **Provisional** = sensible default, to be tuned or verified. **Deferred** = decided later, after live checks.
 
@@ -13,6 +13,7 @@ Status legend: **Accepted** = approved by the owner. **Provisional** = sensible 
 - 2026-11-22: P1.5 findings recorded as TD-016 (ChromaDB kept, PyMuPDF 1.28.2 pinned, dependency check script) and TD-017 (PyMuPDF licence, decision open). TD-012 updated. TD-001, TD-014 and TD-015 gain one note each.
 - 2026-11-23: P1.6 findings recorded as TD-018 (frontend toolchain: exact versions, Tailwind 4 as a Vite plugin, Oxlint instead of ESLint, ports). TD-001 gains one note.
 - 2026-11-24: P1.7a recorded as TD-019 (backend settings, CORS, the frontend's API address and status badge). TD-018 corrected: Windows blocked Oxlint on 2026-11-24, an open issue. TD-015 gains one note. P1.7 is now split into P1.7a and P1.7b, so references to P1.7 in TD-012, TD-014, TD-017 and TD-018 are updated.
+- 2026-11-26: P1.7b recorded. TD-017 is now Accepted (keep PyMuPDF, release under AGPL-3.0) and the `LICENSE` file was added. TD-018 gains a provisional lint plan after Oxlint was blocked again. TD-012 and TD-014 updated.
 
 ---
 
@@ -170,7 +171,7 @@ Location: `backend/evals/` with `datasets/` (JSONL cases), `fixtures/` (small se
 | LLM provider | Phase 6 | Check live free-tier limits, then choose |
 | react-pdf vs simpler PDF viewer | Phase 6 | Try react-pdf first |
 | ChromaDB vs SQLite plus NumPy fallback | Phase 1 (P1.5) | **Resolved 2026-11-22: ChromaDB 1.5.9 kept** (TD-016). The fallback stays possible behind `VectorStore` |
-| PyMuPDF licence: keep it with an AGPL-3.0 repository, or switch to a permissive PDF library | Before the collaborator is invited (P1.7b) | See TD-017 |
+| PyMuPDF licence: keep it with an AGPL-3.0 repository, or switch to a permissive PDF library | Phase 1 (P1.7b) | **Resolved 2026-11-26: keep PyMuPDF, release DocuMind under AGPL-3.0** (TD-017) |
 | Chunk size, overlap, top-k | Phases 5 and 6 | Tune against evals |
 | Upload limit values | Phase 4 | Adjust after testing real PDFs |
 | Cross-origin auth method (tokens vs cookies) | Phase 9 | Decide with separate frontend and backend domains in mind (TD-014) |
@@ -201,7 +202,7 @@ Plan: GitHub holds the source. Vercel hosts the React + Vite frontend (the `fron
 - **Free backend hosting is weak for that shape.** Per a Render article and a comparison page: Render's free web services sleep after 15 minutes idle and no free persistent disk is listed; its free Postgres expires after 30 days. Railway's free plan has a small monthly credit and a 0.5 GB volume, and a paid plan of about $5 per month is recommended for persistent uptime. Fly.io has no free tier for new users. Oracle Cloud's Always Free VM exists but needs a credit card and self-management. The Phase 11 decision is between a small paid plan and a free tier with visible trade-offs. TD-007 restart recovery means a sleeping or restarted worker does not lose jobs.
 - **Architecture unchanged.** TD-001 already names PostgreSQL as the later path. If no suitable host offers a persistent volume, switching storage would be a new decision recorded here.
 - **ChromaDB's size (found in P1.5, TD-016).** It brings dozens of dependencies. That is fine on the owner's laptop, but at P11.2 check that the chosen host has enough memory and disk for the backend with ChromaDB loaded. The `VectorStore` interface (TD-004) allows a lighter store if needed.
-- **PyMuPDF licence (TD-017).** A public network deployment is the case the AGPL covers, so that decision is made before Phase 11 and before the collaborator is invited.
+- **PyMuPDF licence (TD-017).** A public network deployment is the case the AGPL covers, so that decision was made before Phase 11 and before the collaborator was invited (2026-11-26: AGPL-3.0).
 
 **Guardrails before any public URL exists:**
 1. Phase 9 authentication is complete. `AUTH_MODE=single_user` must never be exposed publicly, because anyone could read the seeded user's documents and spend the owner's API quota.
@@ -233,7 +234,7 @@ Found while running the P1.5 dependency spike on the owner's laptop (Windows 11 
 - **Repeatable proof.** `python scripts/check_dependencies.py` prints one `PASS` or `FAIL` line per library. A new library gets one function and one line in `CHECKS`.
 - **Reproducibility proven.** The virtual environment was deleted and rebuilt from `requirements-dev.txt` alone, and the checks and pytest all passed. The requirements files are complete for this machine.
 
-## TD-017 PyMuPDF licence (Provisional, decision due before the collaborator is invited)
+## TD-017 PyMuPDF licence (Accepted 2026-11-26: Option A, AGPL-3.0)
 
 Facts, from Artifex's licensing documentation read on 2026-11-21 (not legal advice; re-read the current terms before deciding): PyMuPDF is dual-licensed under the GNU AGPL-3.0 or a commercial licence from Artifex. Artifex states that offering software built on it as a network service requires making the full source of that software available under the AGPL, unless a commercial licence is bought. DocuMind is planned as a public network service (TD-014), so the question applies from Phase 11.
 
@@ -241,11 +242,13 @@ Options:
 - **A. Keep PyMuPDF and release DocuMind under AGPL-3.0.** The repository becomes public in Phase 11 anyway, so publishing the source costs a portfolio project nothing. Consequence: the AGPL then applies to our code and to anyone who reuses it.
 - **B. Switch to a library with a permissive licence** (for example pypdf or pdfminer.six). That allows a permissive licence such as MIT for our code. Consequence: re-test text quality, page metadata, outline support, speed and scanned-page detection, and redo the P1.5 check.
 
-Current lean: A. Not final.
+**Decision (2026-11-26): Option A.** The owner chose to keep PyMuPDF and release DocuMind under AGPL-3.0. The terms were re-read first. Artifex's licensing page says its open-source code cannot be deployed "as part of a server-based application or service" without disclosing the application's full source code under the AGPL to the users who interact with it, and that a commercial licence is required if the AGPL's requirements cannot be met. pypdf is BSD-3-Clause according to its FAQ. pypdfium2 is Apache-2.0 or BSD-3-Clause according to a PyPI page from 2022 (re-check before relying on it). Option B stays possible, because PDF extraction is built behind an interface in Phase 4.
+- **The `LICENSE` file** holds the AGPL-3.0 text. It was taken from GitHub's licence data, because `gnu.org` could not be reached from the owner's network. A first attempt used GitHub's template picker and got the plain GPL-3.0 text by mistake (commit `9305ef8`). A check of the title line, the version line (`Version 3, 19 November 2007`) and section 13 ("Remote Network Interaction") caught it, and commit `3d62e66` replaced it. The final file has 661 lines, with section 13 at line 540.
+- **In practice:** if someone runs a modified DocuMind as a network service, they must offer its users the source. The README says this in plain words. This is not legal advice.
 
 Guardrails that hold either way:
 - PDF extraction is built behind an interface in Phase 4 (P4.3), with no PyMuPDF import outside it, so switching later is one adapter.
-- Decide before the collaborator is invited (P1.7b), because the licence changes what contributors are agreeing to, and before the repository is made public (P11.1). Add a matching `LICENSE` file when decided.
+- Decided before the collaborator is invited (P1.7b), because the licence changes what contributors are agreeing to, and before the repository is made public (P11.1). The matching `LICENSE` file was added in P1.7b.
 
 ## TD-018 Frontend toolchain confirmed (Accepted)
 
@@ -257,7 +260,7 @@ Found while building P1.6 on the owner's laptop (Windows 11 Home, Node 24.22.3, 
 - **Oxlint instead of ESLint.** The current Vite template ships Oxlint (`npm run lint`, configured in `.oxlintrc.json`). We keep it: it is the template default, it adds no extra dependency, and it reported 0 warnings and 0 errors on 2026-11-23 (Windows blocked it on 2026-11-24, see the Windows bullet below). The ESLint editor extension is not used for the frontend.
 - **Icons:** `lucide-react` with named imports only (`import { FileText } from 'lucide-react'`), so unused icons are not bundled. Decorative icons get `aria-hidden="true"`.
 - **Scripts and ports:** `npm run dev` (port 5173), `npm run build` (`tsc -b && vite build`, output in `dist/`, ignored by Git), `npm run lint`, and `npm run preview` (serves `dist/` on port 4173). The backend uses port 8000. The browser treats these as different origins, so the backend must allow the frontend's origin (CORS), which P1.7a set up from configuration (TD-019).
-- **Windows:** on 2026-11-23 Vite 8, Tailwind 4.3 and Oxlint all ran with Smart App Control active and nothing was blocked. **That changed on 2026-11-24 (open issue):** `npm run lint` failed twice with "An Application Control policy has blocked this file", naming `node_modules\@oxlint\binding-win32-x64-msvc\oxlint.win32-x64-msvc.node`. The same lint run had passed the day before, and the cause is not known. `npm run build` (which includes the TypeScript check), the dev server and Tailwind were not affected. Smart App Control stays on, because turning it off cannot be undone without resetting Windows. Options, to be decided in P1.7b: look for the block in Windows Security (Protection history), retry after a restart, or move the frontend checker to ESLint (plain JavaScript with no native file, at the cost of more packages). **Provisional rule until then:** the TypeScript check inside `npm run build` is the frontend's gate. TD-015's rule about running tools as modules is specific to Python.
+- **Windows:** on 2026-11-23 Vite 8, Tailwind 4.3 and Oxlint all ran with Smart App Control active and nothing was blocked. **That changed on 2026-11-24 (open issue, provisional plan below):** `npm run lint` failed three times (the third time after a clean reinstall with `npm ci` on 2026-11-25) with "An Application Control policy has blocked this file", naming `node_modules\@oxlint\binding-win32-x64-msvc\oxlint.win32-x64-msvc.node`. The same lint run had passed the day before. Windows Security showed a notice that it could not confirm who published that file (it has no publisher signature). Why it was allowed on 2026-11-23 is not known. `npm run build` (which includes the TypeScript check), the dev server and Tailwind were not affected. Smart App Control stays on, because turning it off cannot be undone without resetting Windows. **Provisional plan (2026-11-25; the owner did not object, so confirm it before relying on it):** keep Oxlint, because it is the template default and adds no packages. Do not turn off Smart App Control. On this laptop the frontend's gate is the TypeScript check inside `npm run build`. Run lint, build and tests automatically on GitHub for every pull request (GitHub Actions), where Windows and Smart App Control are not involved. That CI milestone is proposed in `TASKS.md` and not yet scheduled. Switching to ESLint was considered and not chosen: it adds many packages to work around one machine, and TypeScript 7 support in the ESLint tooling was not checked. TD-015's rule about running tools as modules is specific to Python.
 - **Not added yet:** React Router, TanStack Query and react-pdf wait until a screen needs them (Phases 2 and 6).
 - **Starter files removed:** the demo page, `App.css`, the logos, `icons.svg` and the starter README. A DocuMind favicon (`public/favicon.svg`) and the page title `DocuMind` replace them. The template's own `frontend/.gitignore` is kept next to the root one.
 - **Clean install:** a rebuild of `node_modules` from the lock file with `npm ci` is part of the P1.7b rehearsal, the same way the Python environment was rebuilt in P1.5.

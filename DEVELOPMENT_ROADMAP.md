@@ -1,6 +1,6 @@
 # DocuMind: Development Roadmap
 
-Last updated: 2026-11-24
+Last updated: 2026-11-26
 
 ## How to read this
 
@@ -33,7 +33,7 @@ Delivered: architecture, RAG pipeline design, folder structure, risk list, workf
 
 Rule for this phase: one installation or configuration step at a time, each command explained, wait for the owner's confirmation. No software is assumed installed until the owner confirms.
 
-**Progress (2026-11-24):** P1.1 to P1.7a done (P1.7a waits for its pull request). P1.7b not started. P1.7 was split in two to keep each milestone small (TD-011).
+**Progress (2026-11-26):** P1.1 to P1.7b done (P1.7b waits for its pull request). P1.7c, the collaborator invitation and the `phase-1-complete` tag, follows the merge. P1.7 was split to keep each milestone small (TD-011).
 
 | ID | Milestone | Outcome |
 |---|---|---|
@@ -44,9 +44,10 @@ Rule for this phase: one installation or configuration step at a time, each comm
 | P1.5 | Dependency spike | PyMuPDF and ChromaDB install, import and a real functional check on the owner's machine (retires the Windows install risk). Done: ChromaDB kept, PyMuPDF 1.28.2 pinned (TD-016) |
 | P1.6 | Frontend scaffold | Vite, React, TypeScript, Tailwind and Lucide running in the browser. Done: placeholder page, lint and production build checked (TD-018) |
 | P1.7a | Connect frontend and backend | Frontend calls backend `/health` using an API address from the `VITE_API_BASE_URL` environment variable (never hardcoded, TD-014), backend allowed origins read from configuration (CORS), 7 backend tests pass, the status badge checked in the browser (TD-019). Done |
-| P1.7b | Close Phase 1 | A clean install of both sides rehearsed (`npm ci` and the Python rebuild), `SETUP_GUIDE.md` written from the confirmed steps, a decision on the lint tool that Windows blocked (TD-018), PyMuPDF licence decision made with a matching `LICENSE` file (TD-017), collaborator invited (TD-013), `PROJECT_STATE.md` updated, tag `phase-1-complete` |
+| P1.7b | Close Phase 1 | A clean install of both sides rehearsed (`npm ci` and the Python rebuild), `SETUP_GUIDE.md` written from the confirmed steps, a provisional plan for the lint tool that Windows blocked (TD-018), PyMuPDF licence decision made (AGPL-3.0) with a matching `LICENSE` file (TD-017), `README.md` updated, `PROJECT_STATE.md` updated. Done |
+| P1.7c | Collaborator and tag | After the P1.7b merge: collaborator invited with the Write role and branch protection or rulesets checked (TD-013), tag `phase-1-complete` |
 
-Exit criteria: both servers run on the owner's laptop, the repository is on GitHub, setup is documented, the ChromaDB decision is made (done, TD-016), and the PyMuPDF licence decision is made (TD-017).
+Exit criteria: both servers run on the owner's laptop, the repository is on GitHub, setup is documented, the ChromaDB decision is made (done, TD-016), and the PyMuPDF licence decision is made (done: AGPL-3.0, TD-017).
 
 ## Phase 2: Frontend design and implementation (outline)
 
@@ -116,7 +117,7 @@ Expand evals, test large and malformed PDFs, test re-indexing and restart recove
 
 Nothing is deployed before this phase, and not before Phases 9 and 10 are complete (TD-014).
 
-- P11.1 Secret scan, repository made public (this also makes Vercel collaboration free and unlocks rulesets on GitHub Free). A `LICENSE` file that matches the TD-017 decision is in place.
+- P11.1 Secret scan, repository made public (this also makes Vercel collaboration free and unlocks rulesets on GitHub Free). The `LICENSE` file (AGPL-3.0, from TD-017) has been in the repository since P1.7b.
 - P11.2 Choose and set up the backend host after re-checking live pricing: persistent volume, one instance, environment variables, and enough memory and disk for ChromaDB (TD-016).
 - P11.3 Deploy the backend, with CORS limited to the frontend domain, then check `/health` and a restart-recovery test.
 - P11.4 Deploy the frontend on Vercel (`frontend/` as the root directory, `VITE_API_BASE_URL` set).
