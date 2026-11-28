@@ -1,6 +1,6 @@
 # DocuMind: Development Roadmap
 
-Last updated: 2026-11-26
+Last updated: 2026-11-27
 
 ## How to read this
 
@@ -18,10 +18,10 @@ Last updated: 2026-11-26
 | 3. Durable processing, status, retry, no duplicates | 3 (job table), 4 (worker, recovery, retry) |
 | 4. RAG evaluation | 5 (retrieval eval), 6 (answer, citation, hallucination eval), 10 (expansion) |
 | 5. Single-user now, multi-user later | 3 (user-scoped design), 9 (real auth) |
-| 6. Git and GitHub | 1 (setup), every milestone, 11 (public release) |
+| 6. Git and GitHub | 1 (setup and safeguards), every milestone, 11 (final security review and release polish) |
 | 7. Free-plan friendly | Every milestone (TD-011) |
-| Collaboration (TD-013) | 1 (collaborator invited after the setup guide), every milestone (branch and pull request workflow) |
-| Deployment, Vercel plus separate backend host (TD-014) | 1 (API address from an environment variable), 9 (authentication before any public URL), 11 (deploy) |
+| Collaboration (TD-013) | 1 (collaborator invited and accepted, ruleset on `main`), every milestone (branch and pull request workflow) |
+| Deployment, Vercel plus separate backend host (TD-014) | 1 (API address from an environment variable), 9 (authentication before the app gets a public URL), 11 (deploy) |
 
 ---
 
@@ -29,25 +29,25 @@ Last updated: 2026-11-26
 
 Delivered: architecture, RAG pipeline design, folder structure, risk list, workflow, refined decisions (`TECHNICAL_DECISIONS.md`), this roadmap, initial `PROJECT_STATE.md`.
 
-## Phase 1: Project initialization and environment setup (CURRENT)
+## Phase 1: Project initialization and environment setup (COMPLETE, last documentation pull request pending)
 
 Rule for this phase: one installation or configuration step at a time, each command explained, wait for the owner's confirmation. No software is assumed installed until the owner confirms.
 
-**Progress (2026-11-26):** P1.1 to P1.7b done (P1.7b waits for its pull request). P1.7c, the collaborator invitation and the `phase-1-complete` tag, follows the merge. P1.7 was split to keep each milestone small (TD-011).
+**Progress (2026-11-27):** P1.1 to P1.7c done. The pull request that records P1.7c in the documents is the last open item. P1.7 was split to keep each milestone small (TD-011).
 
 | ID | Milestone | Outcome |
 |---|---|---|
 | P1.1 | Environment audit | Windows, terminal, Git, Python, Node.js and VS Code each checked one at a time, and any missing piece installed |
-| P1.2 | Git and GitHub identity | Git configured, GitHub sign-in working, empty private `documind` repository created |
+| P1.2 | Git and GitHub identity | Git configured, GitHub sign-in working, empty `documind` repository created (recorded as private; found public on 2026-11-27, TD-020) |
 | P1.3 | Repository skeleton and first commit | `.gitignore`, stub `README.md`, `TASKS.md`, `PROJECT_STATE.md` and the decision docs committed and pushed (the `frontend/` and `backend/` folders appear with their first files, because Git does not track empty folders) |
 | P1.4 | Backend scaffold | Python 3.12 virtual environment, FastAPI `/health` endpoint, first pytest passing |
 | P1.5 | Dependency spike | PyMuPDF and ChromaDB install, import and a real functional check on the owner's machine (retires the Windows install risk). Done: ChromaDB kept, PyMuPDF 1.28.2 pinned (TD-016) |
 | P1.6 | Frontend scaffold | Vite, React, TypeScript, Tailwind and Lucide running in the browser. Done: placeholder page, lint and production build checked (TD-018) |
 | P1.7a | Connect frontend and backend | Frontend calls backend `/health` using an API address from the `VITE_API_BASE_URL` environment variable (never hardcoded, TD-014), backend allowed origins read from configuration (CORS), 7 backend tests pass, the status badge checked in the browser (TD-019). Done |
-| P1.7b | Close Phase 1 | A clean install of both sides rehearsed (`npm ci` and the Python rebuild), `SETUP_GUIDE.md` written from the confirmed steps, a provisional plan for the lint tool that Windows blocked (TD-018), PyMuPDF licence decision made (AGPL-3.0) with a matching `LICENSE` file (TD-017), `README.md` updated, `PROJECT_STATE.md` updated. Done |
-| P1.7c | Collaborator and tag | After the P1.7b merge: collaborator invited with the Write role and branch protection or rulesets checked (TD-013), tag `phase-1-complete` |
+| P1.7b | Close Phase 1 | A clean install of both sides rehearsed (`npm ci` and the Python rebuild), `SETUP_GUIDE.md` written from the confirmed steps, a provisional plan for the lint tool that Windows blocked (TD-018), PyMuPDF licence decision made (AGPL-3.0) with a matching `LICENSE` file (TD-017), `README.md` updated, `PROJECT_STATE.md` updated. Done, merged by pull request #5 |
+| P1.7c | Collaborator, safeguards and tag | After the P1.7b merge: collaborator invited and accepted. The repository was found to be public (2026-11-27) and kept public, so the history was checked for secrets, secret scanning, push protection and dependency alerts were confirmed or switched on, and a ruleset "Protect main" was added and tested (TD-020). Tag `phase-1-complete` on the P1.7b merge commit. Done |
 
-Exit criteria: both servers run on the owner's laptop, the repository is on GitHub, setup is documented, the ChromaDB decision is made (done, TD-016), and the PyMuPDF licence decision is made (done: AGPL-3.0, TD-017).
+Exit criteria: both servers run on the owner's laptop, the repository is on GitHub, setup is documented, the ChromaDB decision is made (done, TD-016), the PyMuPDF licence decision is made (done: AGPL-3.0, TD-017), and the public repository is protected (done: ruleset on `main`, secret scanning and push protection on, TD-020).
 
 ## Phase 2: Frontend design and implementation (outline)
 
@@ -107,7 +107,7 @@ Multiple-choice questions, flashcards, exam questions and revision notes, genera
 
 ## Phase 9: Database integration, authentication and security (outline)
 
-Swap in real authentication (TD-009), Alembic migrations, rate limiting, PostgreSQL readiness and a security review. Authentication must be complete before any public URL exists. Decide the token-versus-cookie approach with separate frontend and backend domains in mind, and add per-user quotas for the public demo (TD-014).
+Swap in real authentication (TD-009), Alembic migrations, rate limiting, PostgreSQL readiness and a security review. Authentication must be complete before the deployed app has a public URL. Decide the token-versus-cookie approach with separate frontend and backend domains in mind, and add per-user quotas for the public demo (TD-014).
 
 ## Phase 10: Testing, debugging and performance (outline)
 
@@ -117,7 +117,7 @@ Expand evals, test large and malformed PDFs, test re-indexing and restart recove
 
 Nothing is deployed before this phase, and not before Phases 9 and 10 are complete (TD-014).
 
-- P11.1 Secret scan, repository made public (this also makes Vercel collaboration free and unlocks rulesets on GitHub Free). The `LICENSE` file (AGPL-3.0, from TD-017) has been in the repository since P1.7b.
+- P11.1 Final security review of the already-public repository (TD-020): a full-history secret scan, a review of the GitHub security settings and the ruleset, the dependency audit results, and a check that the documents contain no private details. The `LICENSE` file (AGPL-3.0, from TD-017) has been in the repository since P1.7b.
 - P11.2 Choose and set up the backend host after re-checking live pricing: persistent volume, one instance, environment variables, and enough memory and disk for ChromaDB (TD-016).
 - P11.3 Deploy the backend, with CORS limited to the frontend domain, then check `/health` and a restart-recovery test.
 - P11.4 Deploy the frontend on Vercel (`frontend/` as the root directory, `VITE_API_BASE_URL` set).

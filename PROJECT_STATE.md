@@ -1,16 +1,16 @@
 # DocuMind: PROJECT STATE
 
-Last updated: 2026-11-26
+Last updated: 2026-11-27
 
 **How to use this file:** paste it at the start of any new Claude conversation, together with any files being changed. A new conversation must not be assumed to know anything about the project. Once the repository has a collaborator, this file is shared: update it only in the pull request that completes a milestone (TD-013).
 
 ## Current phase
-Phase 1: Project initialization and environment setup. Phase 0 is complete and approved.
+Phase 1: Project initialization and environment setup. It is complete apart from the P1.7c documentation pull request (the tag `phase-1-complete` is already on `main`). Phase 0 is complete and approved.
 
 ## Current task
-**P1.7b Close Phase 1 is finished on branch `sujal/p1-7b-close-phase-1` and is waiting for its pull request to be merged.** This file describes the state as of that merge. Remaining owner steps: commit and push the documentation update, open the pull request (#5), merge it with "Create a merge commit", delete the branch, update local `main`. Then, on `main`: invite the friend as a collaborator with the Write role and check whether rulesets or branch protection are available on the private repository (TD-013), and create the tag `phase-1-complete`. Record the invitation date and the tag in the next documentation update (P2.1).
+**P1.7c (collaborator, public-repository safeguards, tag) is finished and its documentation is on branch `sujal/p1-7c-repo-safeguards`, waiting for its pull request to be merged.** This file describes the state as of that merge. Remaining owner steps: commit and push this documentation update, open the pull request, ask the collaborator to read it (TD-013: changes to `TECHNICAL_DECISIONS.md` need both people to agree), merge it with "Create a merge commit", delete the branch, update local `main`. Separately, enable two-factor authentication on the owner's GitHub account before 2027-01-08 (see Known issues).
 After that the next task is **Phase 2, P2.1: design tokens, light and dark theme, layout shell**, on a new branch `sujal/p2-1-design-tokens-and-layout`.
-P1.7a was merged earlier by pull request #4 (merge commit `14b703b`).
+P1.7b was merged by pull request #5 (merge commit `7ffd508`), and the tag `phase-1-complete` points at that commit. P1.7a was merged by pull request #4 (merge commit `14b703b`).
 
 ## Milestone progress (Phase 1)
 | ID | Milestone | Status |
@@ -22,18 +22,20 @@ P1.7a was merged earlier by pull request #4 (merge commit `14b703b`).
 | P1.5 | Dependency spike (PyMuPDF, ChromaDB) | Done |
 | P1.6 | Frontend scaffold | Done |
 | P1.7a | Connect frontend and backend (settings, CORS, status badge) | Done |
-| P1.7b | Close Phase 1: clean-install rehearsal, setup guide, lint plan, licence decision, README | Done (pending merge). Invite collaborator and tag follow the merge |
+| P1.7b | Close Phase 1: clean-install rehearsal, setup guide, lint plan, licence decision, README | Done. Merged by pull request #5 (merge commit `7ffd508`) |
+| P1.7c | Collaborator, public-repository safeguards, tag `phase-1-complete` | Done (its documentation pull request is pending) |
 
 ## Completed
 - Phase 0: architecture, RAG pipeline design, folder structure, risk list, workflow and roadmap approved. Seven refinements added (`TECHNICAL_DECISIONS.md`, TD-004 to TD-011).
 - P1.1: every tool below was checked and confirmed by the owner, one step at a time.
-- P1.2: Git identity set, GitHub email privacy switched on, private repository created.
+- P1.2: Git identity set, GitHub email privacy switched on, repository created. These documents recorded it as private until 2026-11-27, when GitHub showed it as public (see TD-020).
 - P1.3: project folder, Git repository, remote `origin`, `.gitignore`, `README.md` (commit `f85128b`) and the project documents with `TASKS.md` (commit `9fc6099`), both pushed to GitHub.
 - P1.4: `backend/` folder, Python 3.12 virtual environment, FastAPI app with `GET /health`, first pytest passing, server run and `/health` and `/docs` checked in the browser by the owner. Merged by pull request #1 (feature commit `c41ed55`, merge commit `e6f6787`).
 - P1.5: PyMuPDF 1.28.2 and ChromaDB 1.5.9 installed, pinned and proven by `backend/scripts/check_dependencies.py`. ChromaDB is kept (TD-016). The PyMuPDF licence question is recorded as an open decision (TD-017). The virtual environment was deleted and rebuilt from `requirements-dev.txt` alone, and every check passed. Merged by pull request #2 (feature commit `d3da4e9`, docs commit `340a6a9`, merge commit `8320643`).
 - P1.6: `frontend/` app generated with create-vite 9.3.4 (React and TypeScript), Tailwind CSS 4.3.5 added as a Vite plugin, lucide-react 1.78.0 added, starter demo files removed, own favicon and page title added. A placeholder page proves all of it. Lint, production build and a preview of the built app all checked by the owner. Merged by pull request #3 (feature commit `7886dda`, docs commit `b5fa6a9`, merge commit `9616ff7`) (TD-018).
 - P1.7a: the backend reads its settings from `backend/app/config.py` and allows the frontend's origin through CORS, with 6 new tests (7 passed in total). The frontend reads the API address from `VITE_API_BASE_URL`, calls `GET /health` and shows the result as a status badge on the home page. The owner saw the badge go green with both servers running, red with the backend stopped, and green again after restarting it (TD-019). Merged by pull request #4 (commits `48c5bf3` backend, `c6c0634` frontend, `2b44274` docs; merge commit `14b703b`). Windows blocked `npm run lint` during this milestone (see Known issues).
-- P1.7b: the clean-install rehearsal passed on both sides (frontend: `node_modules` deleted, `npm ci`, build output identical to the previous build; backend: `.venv` deleted and rebuilt from `requirements-dev.txt`, 7 tests passed, both dependency checks passed). `SETUP_GUIDE.md` was written from the confirmed steps (commit `7d798ef`). Licence decided: keep PyMuPDF and release DocuMind under AGPL-3.0 (TD-017, now Accepted). The `LICENSE` file holds the AGPL-3.0 text: commit `9305ef8` held the plain GPL-3.0 text by mistake and commit `3d62e66` replaced it, after a check of the title line and section 13 caught the error. `README.md` was rewritten (commit `8e161f6`). `backend/.env` and `frontend/.env.local` are both confirmed ignored by Git. A provisional plan for the blocked lint tool is recorded in TD-018.
+- P1.7b: the clean-install rehearsal passed on both sides (frontend: `node_modules` deleted, `npm ci`, build output identical to the previous build; backend: `.venv` deleted and rebuilt from `requirements-dev.txt`, 7 tests passed, both dependency checks passed). `SETUP_GUIDE.md` was written from the confirmed steps (commit `7d798ef`). Licence decided: keep PyMuPDF and release DocuMind under AGPL-3.0 (TD-017, now Accepted). The `LICENSE` file holds the AGPL-3.0 text: commit `9305ef8` held the plain GPL-3.0 text by mistake and commit `3d62e66` replaced it, after a check of the title line and section 13 caught the error. `README.md` was rewritten (commit `8e161f6`). `backend/.env` and `frontend/.env.local` are both confirmed ignored by Git. A provisional plan for the blocked lint tool is recorded in TD-018. Merged by pull request #5 (commits `7d798ef`, `9305ef8`, `3d62e66`, `8e161f6`, `66d55f1`; merge commit `7ffd508`).
+- P1.7c (2026-11-27): the Collaborators page showed that the repository is **public**, not private as these documents said. The owner chose to keep it public, so P1.7c became a set of safeguards (TD-020). Checks of the full Git history found only three sensitive-looking file names, all templates or type files (`backend/.env.example`, `frontend/.env.example`, `frontend/src/vite-env.d.ts`), and no API-key or private-key patterns. GitHub's secret scanning and push protection were already on. The owner switched on the dependency graph and Dependabot alerts. A ruleset named "Protect main" (Active, empty bypass list) requires a pull request for `main` and blocks force pushes and deletions, and a test push straight to `main` was refused (`GH013`, "Changes must be made through a pull request"). The collaborator (GitHub `prathameshsail72-hue`), invited on 2026-11-26, accepted the invitation (reported by the owner on 2026-11-27). The annotated tag `phase-1-complete` was created and pushed on merge commit `7ffd508`.
 - Product features: none yet. The backend exposes only `GET /health`. The frontend shows a placeholder page.
 
 ## Files created or modified
@@ -53,6 +55,10 @@ Added by P1.7b (branch `sujal/p1-7b-close-phase-1`), all in the repository root:
 - `SETUP_GUIDE.md` (new, Windows setup), `LICENSE` (new, AGPL-3.0 text), `README.md` (rewritten: status, stack, setup pointer, document index, licence).
 - Updated in the P1.7b documentation commit: `PROJECT_STATE.md`, `TASKS.md`, `DEVELOPMENT_ROADMAP.md`, `TECHNICAL_DECISIONS.md` (TD-017 Accepted, TD-018 lint plan).
 
+Added by P1.7c (branch `sujal/p1-7c-repo-safeguards`), documentation only, all in the repository root:
+- Updated: `PROJECT_STATE.md`, `TASKS.md`, `DEVELOPMENT_ROADMAP.md`, `TECHNICAL_DECISIONS.md` (new TD-020; TD-010, TD-012, TD-013, TD-014 and TD-017 corrected), `README.md` (Contributing line) and `SETUP_GUIDE.md` (repository access, working together).
+- Not files in the repository: the GitHub ruleset "Protect main", the Advanced Security settings and the tag `phase-1-complete`. They are described in TD-020.
+
 Local only, never committed: `backend/.venv/`, `frontend/node_modules/`, `frontend/dist/`, `frontend/.env.local` (all gitignored; the last one was confirmed with `git check-ignore`).
 
 ## Architecture (summary, unchanged)
@@ -65,10 +71,10 @@ Local only, never committed: `backend/.venv/`, `frontend/node_modules/`, `fronte
 Details: `TECHNICAL_DECISIONS.md`.
 
 ## Collaboration and deployment plan (recorded 2026-11-21, details in TD-013 and TD-014)
-- The owner (GitHub user `tambesujal406-design`) owns the private repository `documind`. A friend will be added as a collaborator at the end of Phase 1, once `SETUP_GUIDE.md` exists and the PyMuPDF licence decision (TD-017) is made. Both are now done. The friend is invited right after pull request #5 is merged, so that `main` already holds the setup guide, the licence and the new README. Not added yet.
-- Both contribute through branches and pull requests, with meaningful commits.
+- The owner (GitHub user `tambesujal406-design`) owns the public repository `documind` (found public on 2026-11-27 and kept public by the owner's choice, TD-020). The collaborator, GitHub user `prathameshsail72-hue`, was invited on 2026-11-26, after `SETUP_GUIDE.md`, the licence decision (TD-017), the `LICENSE` file and the new README were on `main`, and accepted (reported by the owner on 2026-11-27). A personal repository gives a collaborator one fixed access level (read and write): they can push branches and merge pull requests but cannot change the repository's settings.
+- Both contribute through branches and pull requests, with meaningful commits. GitHub enforces the pull request rule on `main` (ruleset "Protect main", TD-020).
 - Deployment target: GitHub for source, Vercel for the React + Vite frontend, a separate host for the FastAPI backend, worker and persistent data. Goal: one live URL shared in both LinkedIn posts.
-- **Nothing is deployed before Phase 11.** No public URL before Phase 9 authentication exists.
+- **Nothing is deployed before Phase 11.** The deployed app gets no public URL before Phase 9 authentication exists. The source repository is public already, so no secret may ever be committed (TD-020).
 - The frontend reads the API address from `VITE_API_BASE_URL` (done in P1.7a, TD-019), never a hardcoded address.
 
 ## Technologies and dependencies
@@ -144,22 +150,27 @@ Frontend: run in PowerShell from `C:\dev\documind\frontend`. The Python environm
 - 2026-11-25: frontend clean rebuild: `node_modules` deleted, `npm ci`, then `npm run build` passed with identical output (2133 modules; `index-CnFYzOV-.css` 10.17 kB and `index-BkS5E6j9.js` 225.38 kB). `git status` stayed clean, so `package-lock.json` was not changed. `npm run lint` was blocked a third time, even after the reinstall, and Windows Security showed a notice that it could not confirm who published `oxlint.win32-x64-msvc.node`.
 - 2026-11-25: backend clean rebuild: `.venv` deleted and recreated with `py -3.12`, installed from `requirements-dev.txt` alone. `python -m pytest` gave `7 passed`, and `check_dependencies.py` gave `PASS PyMuPDF`, `PASS ChromaDB` and `All checks passed`.
 - 2026-11-26: the `LICENSE` file's title line (`GNU AFFERO GENERAL PUBLIC LICENSE`, `Version 3, 19 November 2007`), its line count (661) and its section 13 ("Remote Network Interaction", line 540) were checked.
-- Not tested: the dependency checks ran only on the owner's laptop (Windows, Python 3.12.10, Node 24.22.3). The collaborator's machine and the future backend host are untested. A fresh `git clone` followed by `SETUP_GUIDE.md` on a second computer has not been done yet; the collaborator's first setup is that test. The frontend has no automated tests yet. The "Backend address not set" badge was not seen in a browser; only the `api.ts` logic behind it was tested (under Node).
+- 2026-11-27: on `main` (merge commit `7ffd508`) the annotated tag `phase-1-complete` was created and pushed. `git tag -n1` listed it, and a second `git push` answered "Everything up-to-date". The history check listed only `backend/.env.example`, `frontend/.env.example` and `frontend/src/vite-env.d.ts` as added files with sensitive-looking names, and `git grep` for common API-key and private-key patterns across every commit printed nothing. These checks cover common formats only.
+- 2026-11-27: GitHub Settings, Advanced Security (read from screenshots): Secret Protection on, push protection on, dependency graph and Dependabot alerts off and then on after the owner switched them (second screenshot), Dependabot security updates off, malware alerts off at last sight, CodeQL not set up, the three AI Scan options off, private vulnerability reporting not enabled.
+- 2026-11-27: the ruleset "Protect main" was read back from screenshots: Active, bypass list empty, target `main` ("Applies to 1 target"), rules as listed in TD-020. A test commit made locally on `main` was pushed with `git push origin main` and GitHub refused it: `GH013: Repository rule violations found for refs/heads/main` and `Changes must be made through a pull request`. The whole push was rejected, so the test commit never reached GitHub.
+- Not tested: the dependency checks ran only on the owner's laptop (Windows, Python 3.12.10, Node 24.22.3). The collaborator's machine and the future backend host are untested. A fresh `git clone` followed by `SETUP_GUIDE.md` on a second computer has not been done yet; the collaborator's first setup is that test. The frontend has no automated tests yet. The "Backend address not set" badge was not seen in a browser; only the `api.ts` logic behind it was tested (under Node). The ruleset's blocks on force pushes and on deleting `main` were not tried (only the pull-request rule was), and that Required approvals = 0 was saved was not confirmed by a reload (the form showed 0). The first merge under the ruleset will show it: a pull request that still needs approval cannot be merged by its author.
 
 ## Known bugs and unresolved issues
 - No known bugs.
 - **Decided (TD-017, 2026-11-26):** PyMuPDF is AGPL-3.0 or commercial. DocuMind keeps PyMuPDF and is released under AGPL-3.0, with a `LICENSE` file. PDF extraction is still built behind an interface in Phase 4, so switching later stays possible. This is not legal advice.
+- **The repository is public (found 2026-11-27, TD-020).** Every commit so far, and every commit from now on, is visible to everyone. Never commit a key, a password, a token or a `.env` file. If a secret is ever pushed, treat it as leaked: replace it at the provider first, then clean the history. How and when the repository became public is not known; these documents said private until 2026-11-27.
+- **GitHub requires two-factor authentication on the owner's account before 2027-01-08** (banner on the Settings pages, 2026-11-27). After that date the account is restricted from account actions, which would block pushing and merging. Not done at the time of writing. The collaborator may see the same banner.
 - Windows 11 Smart App Control blocked `pip.exe` ("An Application Control policy has blocked this file"). Workaround: run Python tools as `python -m ...` (TD-015). Compiled packages loaded fine (pydantic-core, watchfiles, httptools, PyMuPDF, ChromaDB, Vite, Tailwind). Oxlint is the exception since 2026-11-24 (next item). Do not disable Windows security.
 - **Oxlint blocked (open, provisional plan, since 2026-11-24).** `npm run lint` failed three times (the third time after a clean `npm ci` on 2026-11-25) with "An Application Control policy has blocked this file", naming `node_modules\@oxlint\binding-win32-x64-msvc\oxlint.win32-x64-msvc.node`. The same lint run passed with 0 warnings on 2026-11-23, and why it changed is unknown. Nothing else is affected: `npm run build` (which includes the TypeScript check), the dev server and Tailwind all work. Smart App Control stays on, because turning it off cannot be undone without resetting Windows. Windows Security said it could not confirm who published that file (it has no publisher signature). Provisional plan (TD-018): keep Oxlint (the template default, no extra packages), treat the TypeScript check in `npm run build` as the frontend's gate on this laptop, and add a GitHub Actions check that runs lint, build and tests on every pull request, where Windows is not involved. That CI milestone is proposed and waits for the owner's confirmation (`TASKS.md`). Switching to ESLint was considered and not chosen, because it adds many packages and its TypeScript 7 support was not checked.
 - `gnu.org` could not be reached from the owner's network on 2026-11-26 (PowerShell: unable to connect; browser: connection timed out), while GitHub worked. The AGPL text was taken from GitHub's licence data instead. Any step that needs `gnu.org` may fail on this network.
 - The "new pip release available" notice is ignored for now (pip is 25.0.1).
 - VS Code showed one "Error refreshing packages" notice from its Python Environments extension on 2026-11-23. It did not affect the project and was not investigated.
 - Open risks: free-tier API quotas, scanned PDFs without text, ChromaDB's size and memory on a small backend host (check in P11.2, TD-014). The ChromaDB install risk on Windows is retired.
-- Deployment constraints (TD-014): Vercel Hobby does not support collaboration on private repositories; free backend hosting is weak for a persistent-disk, always-on service. Both are Phase 11 decisions.
+- Deployment constraints (TD-014): Vercel Hobby does not support collaboration on private repositories, which does not apply while the repository is public (re-check Vercel's terms in Phase 11). Free backend hosting is weak for a persistent-disk, always-on service, which is a Phase 11 decision.
 - Deferred decisions: embedding provider (Phase 5), LLM provider (Phase 6), PDF viewer (Phase 6), backend host and Vercel plan (Phase 11), cross-origin auth method (Phase 9). See TD-012.
 
 ## Owner environment
-Windows 11 laptop (an earlier version of this file said Windows 10, which was wrong), 8 GB RAM, Intel Core i3, integrated graphics, 512 GB storage. Free Claude plan with usage limits. Project folder: `C:\dev\documind`. Repository: https://github.com/tambesujal406-design/documind.git (private).
+Windows 11 laptop (an earlier version of this file said Windows 10, which was wrong), 8 GB RAM, Intel Core i3, integrated graphics, 512 GB storage. Free Claude plan with usage limits. Project folder: `C:\dev\documind`. Repository: https://github.com/tambesujal406-design/documind.git (public).
 
 ## Working agreements
 - One setup step at a time, each command explained, wait for the owner's confirmation.
@@ -172,7 +183,9 @@ Windows 11 laptop (an earlier version of this file said Windows 10, which was wr
 - Complete code for every created or changed file, with exact file paths.
 
 ## Exact next steps
-1. Finish P1.7b: commit and push the documentation update on `sujal/p1-7b-close-phase-1`, open pull request #5, merge with "Create a merge commit", delete the branch, update local `main`.
-2. On `main` after the merge: invite the friend as a collaborator (Write role) and check whether branch protection or rulesets are available on the private repository (TD-013). Create and push the tag `phase-1-complete`. Record both in the P2.1 documentation update.
-3. Decide whether to add the proposed GitHub Actions check (lint, build and tests on every pull request), which also gets around the Oxlint block (TD-018).
-4. Phase 2, starting with P2.1 (design tokens, light and dark theme, layout shell), on a new branch `sujal/p2-1-design-tokens-and-layout`.
+1. Finish P1.7c: commit and push this documentation update on `sujal/p1-7c-repo-safeguards`, open the pull request, ask the collaborator to read it and agree (TD-013), merge with "Create a merge commit", delete the branch, update local `main`. The merge also shows whether Required approvals = 0 was saved.
+2. Owner: enable two-factor authentication on the GitHub account before 2027-01-08.
+3. Collaborator: follow `SETUP_GUIDE.md` on their own computer and report every step that fails. That is the first test of a fresh clone on a second computer.
+4. Decide whether to add the proposed GitHub Actions check (lint, build and tests on every pull request), which also gets around the Oxlint block (TD-018) and could carry CodeQL scanning (TD-020).
+5. Phase 2, starting with P2.1 (design tokens, light and dark theme, layout shell), on a new branch `sujal/p2-1-design-tokens-and-layout`.
+6. After the collaborator's first pull request, decide whether to raise Required approvals on `main` from 0 to 1 (TD-020).

@@ -14,7 +14,7 @@ This guide takes you from nothing to both DocuMind servers running on your own c
 | Python | 3.12.10 | `py -3.12 --version` | Install Python 3.12 from https://www.python.org and keep the "py launcher" option ticked. Other versions are not tested. Your default `python` may be a different version, which is why every command below says `py -3.12` |
 | Node.js and npm | Node 24.22.3, npm 11.19.1 | `node --version` and `npm --version` | https://nodejs.org. Vite 8 needs Node 20.19 or newer (or 22.12 or newer) |
 | VS Code | 1.147.0 | optional | https://code.visualstudio.com |
-| GitHub access | | | The repository is private. The owner must add your GitHub account as a collaborator first, then accept the invitation email |
+| GitHub access | | | The repository is public, so anyone can clone it. To push your own branches you must be a collaborator: the owner adds your GitHub account, and you accept the invitation email |
 
 You also need an internet connection for the installs. The first backend install takes a few minutes because ChromaDB brings many packages.
 
@@ -125,10 +125,11 @@ Frontend (PowerShell, in `frontend`):
 ## 8. Working together
 
 The full rules are in `TECHNICAL_DECISIONS.md` (TD-010, TD-011 and TD-013). In short:
-- Never commit straight to `main`. Make a branch named `sujal/<milestone-id>-<topic>` (use your own name in place of `sujal`).
+- Never commit straight to `main` (GitHub refuses direct pushes to it). Make a branch named `sujal/<milestone-id>-<topic>` (use your own name in place of `sujal`).
 - Commit messages follow Conventional Commits, for example `feat(frontend): show live backend status`.
 - Open a pull request and merge it with **Create a merge commit**. Update the documents (`PROJECT_STATE.md`, `TASKS.md`) in the pull request that finishes a milestone.
 - Before starting a milestone, put your name in the Owner column of `TASKS.md`.
+- The repository is public. Never commit a key, a password or a `.env` file. If you ever push one by mistake, tell the owner straight away so it can be replaced at the provider.
 
 ## 9. What has been verified
 

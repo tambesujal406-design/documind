@@ -49,7 +49,7 @@ Phase 0 (architecture) and Phase 1 (setup) are done. Next: Phase 2 frontend desi
 
 ## Contributing
 
-Work happens on a branch and is merged through a pull request, never straight to `main`. The rules are in section 8 of [SETUP_GUIDE.md](SETUP_GUIDE.md) and in [TECHNICAL_DECISIONS.md](TECHNICAL_DECISIONS.md) (TD-010, TD-011 and TD-013).
+Work happens on a branch and is merged through a pull request, never straight to `main`, and GitHub refuses direct pushes to it. The rules are in section 8 of [SETUP_GUIDE.md](SETUP_GUIDE.md) and in [TECHNICAL_DECISIONS.md](TECHNICAL_DECISIONS.md) (TD-010, TD-011 and TD-013).
 
 ## Licence
 

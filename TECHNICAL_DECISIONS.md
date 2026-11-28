@@ -1,6 +1,6 @@
 # DocuMind: Technical Decisions
 
-Last updated: 2026-11-26 (P1.7b results recorded)
+Last updated: 2026-11-27 (P1.7c results recorded)
 
 Status legend: **Accepted** = approved by the owner. **Provisional** = sensible default, to be tuned or verified. **Deferred** = decided later, after live checks.
 
@@ -14,6 +14,7 @@ Status legend: **Accepted** = approved by the owner. **Provisional** = sensible 
 - 2026-11-23: P1.6 findings recorded as TD-018 (frontend toolchain: exact versions, Tailwind 4 as a Vite plugin, Oxlint instead of ESLint, ports). TD-001 gains one note.
 - 2026-11-24: P1.7a recorded as TD-019 (backend settings, CORS, the frontend's API address and status badge). TD-018 corrected: Windows blocked Oxlint on 2026-11-24, an open issue. TD-015 gains one note. P1.7 is now split into P1.7a and P1.7b, so references to P1.7 in TD-012, TD-014, TD-017 and TD-018 are updated.
 - 2026-11-26: P1.7b recorded. TD-017 is now Accepted (keep PyMuPDF, release under AGPL-3.0) and the `LICENSE` file was added. TD-018 gains a provisional lint plan after Oxlint was blocked again. TD-012 and TD-014 updated.
+- 2026-11-27: P1.7c recorded. The repository was found to be public (these documents said private) and the owner kept it public. New TD-020 (public repository safeguards). TD-010, TD-012, TD-013, TD-014 and TD-017 corrected.
 
 ---
 
@@ -143,7 +144,7 @@ Location: `backend/evals/` with `datasets/` (JSONL cases), `fixtures/` (small se
 ## TD-010 Git and GitHub workflow (Accepted)
 
 - The repository is initialized in Phase 1 before any application code. The first commit is `.gitignore` plus a stub README.
-- The GitHub remote starts **private**. It becomes public in Phase 11 after a secret scan.
+- The GitHub remote was planned to start **private** and become public in Phase 11 after a secret scan. **Correction (2026-11-27): it is public**, and the owner chose to keep it public. The history was checked on 2026-11-27, GitHub's secret scanning and push protection are on, and `.env` files are ignored (TD-020). A final scan stays in P11.1.
 - Gitignored: `.env`, `storage/`, virtual environments, `node_modules`, uploaded PDFs, Chroma data and eval reports (except the committed baseline). `.env.example` is committed.
 - `main` always works. Each milestone gets its own branch (for example `p1-backend-scaffold`), merged through a pull request. Docs-only fixes may go straight to `main` while the owner works alone. Once a collaborator joins, every change goes through a pull request (TD-013).
 - Commits follow Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`, `refactor:`), small and specific.
@@ -176,15 +177,15 @@ Location: `backend/evals/` with `datasets/` (JSONL cases), `fixtures/` (small se
 | Upload limit values | Phase 4 | Adjust after testing real PDFs |
 | Cross-origin auth method (tokens vs cookies) | Phase 9 | Decide with separate frontend and backend domains in mind (TD-014) |
 | Backend host (needs always-on process and a persistent disk) | Phase 11 | Re-check live pricing and limits, then choose (TD-014) |
-| Vercel plan vs making the repository public | Phase 11 | See TD-014 |
+| Vercel plan (the repository is already public, TD-020) | Phase 11 | **Updated 2026-11-27:** a public repository removes the Hobby collaboration problem. Re-check Vercel's terms and limits in Phase 11 (TD-014) |
 
 ## TD-013 Two-person Git workflow (Accepted, details Provisional)
 
 Context: the owner owns the GitHub repository `documind`. A friend joins as a collaborator and both contribute to the same repository.
 
-- **Ownership and timing:** the owner owns the repository. The friend is invited at the end of Phase 1, once `SETUP_GUIDE.md` exists, so they can set up the same environment from it. Each person sets their own GitHub noreply commit email.
-- **No direct pushes to `main`** once the collaborator joins. Every change is a branch, then a pull request, then review and merge by the *other* person.
-- **Enforcement:** GitHub's documentation says rulesets are available on GitHub Free only for public repositories, and for private repositories they need Pro or Team. We could not confirm from the documentation whether the older branch protection settings are available for private repositories on Free. Until we check the repository's Settings page, the rule is by agreement. Rulesets become available on Free when the repository goes public (Phase 11).
+- **Ownership and timing:** the owner owns the repository. The friend was invited on 2026-11-26, once `SETUP_GUIDE.md`, the licence and the README were on `main`, so they can set up the same environment from it, and accepted (reported by the owner on 2026-11-27). A personal repository gives a collaborator one fixed access level (read and write): they can push branches and merge pull requests but cannot change settings. Each person sets their own GitHub noreply commit email.
+- **No direct pushes to `main`** now that the collaborator has joined. Every change is a branch, then a pull request. The aim is review and merge by the *other* person. GitHub requires the pull request but, for now, no approval (Required approvals is 0, TD-020), so neither person is blocked while the other is away. Raise it to 1 when both agree, after the collaborator's first pull request.
+- **Enforcement (updated 2026-11-27):** the repository is public, and rulesets are available on GitHub Free for public repositories. The ruleset "Protect main" enforces the pull request rule, blocks force pushes and deletion of `main`, and has an empty bypass list, so it applies to the owner too. A test push straight to `main` was refused. Details are in TD-020. GitHub's documentation (read 2026-11-26) says rulesets and branch protection are not available for private repositories on GitHub Free, so making the repository private again would switch this protection off.
 - **Branch names:** `<yourname>/<milestone-id>-<topic>`, for example `sujal/p2-1-design-tokens`. One milestone has one author.
 - **Avoid collisions:** both agree in `TASKS.md` who is on which milestone before starting. Prefer splitting by area (`frontend/` and `backend/`).
 - **Shared files** (`PROJECT_STATE.md`, `TASKS.md`, `TECHNICAL_DECISIONS.md`): updated only inside the pull request that completes a milestone, after pulling the latest `main`. Changes to `TECHNICAL_DECISIONS.md` need both people to agree in the pull request.
@@ -197,14 +198,14 @@ Context: the owner owns the GitHub repository `documind`. A friend joins as a co
 Plan: GitHub holds the source. Vercel hosts the React + Vite frontend (the `frontend/` folder set as the project root). A separate host runs the FastAPI backend, the background worker and the persistent data. One live URL is shared in both LinkedIn posts.
 
 **Constraints found on 2026-11-21 (from the providers' own documentation and comparison articles; re-check before deploying):**
-- **Vercel Hobby and collaborators:** Vercel's documentation says the Hobby plan does not support collaboration for private repositories, and that a commit is deployed only if its author is the owner of the Hobby team. Collaboration is free for public repositories, and Pro is the paid alternative. Plan: make the repository public in Phase 11 (already planned, after a secret scan), or use Pro. Vercel is not involved before then.
+- **Vercel Hobby and collaborators:** Vercel's documentation says the Hobby plan does not support collaboration for private repositories, and that a commit is deployed only if its author is the owner of the Hobby team. Collaboration is free for public repositories, and Pro is the paid alternative. Update 2026-11-27: the repository is already public (TD-020), so this constraint does not apply now. Re-check Vercel's terms before deploying in Phase 11. Vercel is not involved before then.
 - **Vercel cannot host the backend.** The backend needs an always-on process (the in-process worker, TD-007), a persistent disk (SQLite, uploaded PDFs, ChromaDB), and exactly one running instance (single SQLite writer, single worker).
 - **Free backend hosting is weak for that shape.** Per a Render article and a comparison page: Render's free web services sleep after 15 minutes idle and no free persistent disk is listed; its free Postgres expires after 30 days. Railway's free plan has a small monthly credit and a 0.5 GB volume, and a paid plan of about $5 per month is recommended for persistent uptime. Fly.io has no free tier for new users. Oracle Cloud's Always Free VM exists but needs a credit card and self-management. The Phase 11 decision is between a small paid plan and a free tier with visible trade-offs. TD-007 restart recovery means a sleeping or restarted worker does not lose jobs.
 - **Architecture unchanged.** TD-001 already names PostgreSQL as the later path. If no suitable host offers a persistent volume, switching storage would be a new decision recorded here.
 - **ChromaDB's size (found in P1.5, TD-016).** It brings dozens of dependencies. That is fine on the owner's laptop, but at P11.2 check that the chosen host has enough memory and disk for the backend with ChromaDB loaded. The `VectorStore` interface (TD-004) allows a lighter store if needed.
 - **PyMuPDF licence (TD-017).** A public network deployment is the case the AGPL covers, so that decision was made before Phase 11 and before the collaborator was invited (2026-11-26: AGPL-3.0).
 
-**Guardrails before any public URL exists:**
+**Guardrails before the deployed app has a public URL** (the source repository is already public, TD-020):
 1. Phase 9 authentication is complete. `AUTH_MODE=single_user` must never be exposed publicly, because anyone could read the seeded user's documents and spend the owner's API quota.
 2. Per-user daily limits on uploads, questions and re-indexing, tighter upload sizes for the demo, a quota cap, and friendly handling of provider rate-limit errors.
 3. A visible notice that uploaded text is sent to third-party AI providers, with working document deletion (TD-006).
@@ -239,7 +240,7 @@ Found while running the P1.5 dependency spike on the owner's laptop (Windows 11 
 Facts, from Artifex's licensing documentation read on 2026-11-21 (not legal advice; re-read the current terms before deciding): PyMuPDF is dual-licensed under the GNU AGPL-3.0 or a commercial licence from Artifex. Artifex states that offering software built on it as a network service requires making the full source of that software available under the AGPL, unless a commercial licence is bought. DocuMind is planned as a public network service (TD-014), so the question applies from Phase 11.
 
 Options:
-- **A. Keep PyMuPDF and release DocuMind under AGPL-3.0.** The repository becomes public in Phase 11 anyway, so publishing the source costs a portfolio project nothing. Consequence: the AGPL then applies to our code and to anyone who reuses it.
+- **A. Keep PyMuPDF and release DocuMind under AGPL-3.0.** The repository is public anyway (planned for Phase 11, found already public on 2026-11-27), so publishing the source costs a portfolio project nothing. Consequence: the AGPL then applies to our code and to anyone who reuses it.
 - **B. Switch to a library with a permissive licence** (for example pypdf or pdfminer.six). That allows a permissive licence such as MIT for our code. Consequence: re-test text quality, page metadata, outline support, speed and scanned-page detection, and redo the P1.5 check.
 
 **Decision (2026-11-26): Option A.** The owner chose to keep PyMuPDF and release DocuMind under AGPL-3.0. The terms were re-read first. Artifex's licensing page says its open-source code cannot be deployed "as part of a server-based application or service" without disclosing the application's full source code under the AGPL to the users who interact with it, and that a commercial licence is required if the AGPL's requirements cannot be met. pypdf is BSD-3-Clause according to its FAQ. pypdfium2 is Apache-2.0 or BSD-3-Clause according to a PyPI page from 2022 (re-check before relying on it). Option B stays possible, because PDF extraction is built behind an interface in Phase 4.
@@ -248,7 +249,7 @@ Options:
 
 Guardrails that hold either way:
 - PDF extraction is built behind an interface in Phase 4 (P4.3), with no PyMuPDF import outside it, so switching later is one adapter.
-- Decided before the collaborator is invited (P1.7b), because the licence changes what contributors are agreeing to, and before the repository is made public (P11.1). The matching `LICENSE` file was added in P1.7b.
+- Decided before the collaborator was invited (P1.7b), because the licence changes what contributors are agreeing to. The matching `LICENSE` file was added in P1.7b. Update 2026-11-27: the repository was already public (TD-020), so the licence mattered earlier than planned. The decision stands.
 
 ## TD-018 Frontend toolchain confirmed (Accepted)
 
@@ -279,3 +280,20 @@ Built in P1.7a on the owner's laptop, 2026-11-23 and 2026-11-24. It carries out 
 - **The home page shows four states** as a badge: checking (amber, pulsing), connected (green, with the service name from `/health`), address not set (red, with a hint) and not reachable (red, with a hint). The check runs once when the page opens, through an `AbortController`, and a result that arrives after the request was cancelled is ignored. In development React runs the effect twice on purpose (StrictMode), so the backend may log two `GET /health` lines. The production build asks once.
 - **Verified on 2026-11-24:** `npm run build` passed with real React types, and the owner watched the badge go green with both servers running, red with the backend stopped, and green again after the restart. A green badge also proves that the browser accepted the CORS headers.
 - **Not verified:** the "address not set" badge was not seen in a browser (only the `api.ts` logic behind it, under Node). The frontend has no automated tests yet. Lint could not run (TD-018).
+
+## TD-020 Public repository safeguards (Accepted 2026-11-27)
+
+Found and set up in P1.7c on 2026-11-27, from the owner's screenshots of GitHub's pages and of the terminal. It corrects the earlier documents, which said the repository was private.
+
+- **Finding.** The Collaborators page header read "Public repository". Until then these documents (TD-010, TD-013, TD-014) said the repository was private and would become public in Phase 11. How and when it became public is not known. The owner was asked and chose to keep it public.
+- **What public means.** Every commit so far and every future commit is visible to everyone, and `git clone` works without signing in. A secret committed once must be treated as leaked, even if a later commit removes it: replace it at the provider first, then clean the history. Real keys live only in environment variables or in the ignored `backend/.env`, and never in `VITE_` variables (TD-019).
+- **History check (2026-11-27, read-only).** (1) Every file name ever added that contains `env`, `key`, `secret`, `credential`, `pem`, `.db`, `sqlite` or `storage`: only `backend/.env.example`, `frontend/.env.example` and `frontend/src/vite-env.d.ts`, which are templates and type definitions. (2) `git grep` over every commit for common API-key and private-key formats (`sk-...`, `AKIA...`, `ghp_...`, `AIza...`, `BEGIN ... PRIVATE KEY`): no output. These checks cover common formats only. No real key had been added to the project at that time.
+- **GitHub settings (Settings, Advanced Security).** On: Secret Protection (secret scanning) and push protection, which refuses a push that contains a supported secret. Switched on by the owner on 2026-11-27: the dependency graph and Dependabot alerts. Left off on purpose: Dependabot security updates and grouped updates (they open pull requests by themselves, and there is no automated check on GitHub yet), automatic dependency submission, and all three AI Scan options (the page says they consume AI credits). Not set up yet: CodeQL (it runs through GitHub Actions, so it follows the CI decision in `TASKS.md`), private vulnerability reporting (decide before Phase 11) and malware alerts (optional; off when last seen). Copilot Autofix shows On but needs CodeQL to do anything. "Dependabot auto-triage rules" shows one rule enabled by GitHub, which we did not change.
+- **Ruleset "Protect main"** (Settings, Rulesets). Enforcement Active, bypass list empty, target the default branch (`main`, "Applies to 1 target"). Ticked: Restrict deletions, Block force pushes, and Require a pull request before merging with Required approvals 0. Unticked on purpose: Restrict creations; Restrict updates (it would block pull request merges too); Require linear history (it would block the "Create a merge commit" method of TD-013); Require deployments; Require signed commits (our laptops do not sign commits); Require status checks (there are no automated checks on GitHub yet, so nothing could pass); code scanning, code quality and code coverage results; and automatic Copilot code review. "Require an additional approval for unattributed Copilot pull requests" was ticked by default and has no effect while Required approvals is 0. Allowed merge methods stayed Merge, Squash and Rebase. Because the bypass list is empty, the rule applies to the owner too. To change it, the owner edits the ruleset in Settings.
+- **Required approvals is 0, on purpose.** GitHub offered 1 as the default. With 1, nobody can approve their own pull request, so every merge would wait for the other person. Review is expected by agreement (TD-013). Raise it to 1 when both agree, after the collaborator's first pull request.
+- **Tested.** On 2026-11-27 an empty commit made locally on `main` was pushed with `git push origin main`. GitHub refused it with `GH013: Repository rule violations found for refs/heads/main`, `Changes must be made through a pull request` and `push declined due to repository rule violations`. The commit stayed local. **Not tested:** the blocks on force pushes and on deleting `main` (trying them would risk the real branch), and the saving of Required approvals = 0 (the form showed 0, and a reload was not seen).
+- **Collaborator.** GitHub user `prathameshsail72-hue` was invited on 2026-11-26 and accepted (reported by the owner on 2026-11-27). The ruleset applies to them as well.
+- **Tag.** The annotated tag `phase-1-complete` points at merge commit `7ffd508` (pull request #5) and is on GitHub.
+- **Two-factor authentication.** On 2026-11-27 GitHub's Settings pages showed a banner: two-factor authentication is required on the owner's account before 2027-01-08, or the account is restricted from account actions. A restriction would block pushing and merging. It is an open action in `TASKS.md`.
+- **If the repository is ever made private again,** the ruleset and branch protection stop being available on GitHub Free (documentation read 2026-11-26), and Vercel Hobby collaboration is limited (TD-014). Re-check before doing it.
+- **Left for later:** a final full-history secret scan and a review of these settings in P11.1; private vulnerability reporting, CodeQL and malware alerts as optional extras; raising Required approvals.
